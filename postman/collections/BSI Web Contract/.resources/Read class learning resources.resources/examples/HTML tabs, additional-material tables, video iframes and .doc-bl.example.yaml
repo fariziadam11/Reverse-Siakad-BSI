@@ -1,0 +1,26 @@
+$kind: http-example
+name: HTML tabs, additional-material tables, video iframes and .doc-block download links.
+request:
+  url: "{{baseUrl}}/learning/:opaqueId"
+  method: GET
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  pathVariables:
+    - key: opaqueId
+      value: string
+      disabled: false
+      description: (Required) Exact encrypted ID from the authenticated schedule; do not decode or synthesize it.
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,9 @@
+$kind: http-request
+url: '{{baseUrl}}/server-error'
+method: GET
+order: 6000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Unavailable upstream returns HTTP 503', function () { pm.response.to.have.status(503); });

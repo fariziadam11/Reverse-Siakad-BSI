@@ -1,0 +1,28 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/foto-profil/update"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: _token
+      value: "{{csrfToken}}"
+      disabled: false
+      description: "(Required) "
+    - key: _method
+      value: patch
+      disabled: false
+      description: "(Required) "
+    - key: name
+      value: "{{name}}"
+      disabled: false
+      description: "(Required) "
+    - key: email
+      value: "{{email}}"
+      disabled: false
+      description: "(Required) "
+settings: {}
+examples: ./.resources/Submit the current profile form.resources/examples
+order: 2000

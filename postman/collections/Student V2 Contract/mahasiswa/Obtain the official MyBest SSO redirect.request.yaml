@@ -1,0 +1,9 @@
+$kind: http-request
+description: "Observed read-only: authenticated Student V2 returns an HTTPS redirect to elearning.bsi.ac.id/authenticate-student with an opaque token query parameter. Open it with the separate MyBest cookie store and verify /user/dashboard. Do not persist tokens or forward Student cookies across origins."
+url: "{{baseUrl}}/mahasiswa/myLMS"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Obtain the official MyBest SSO redirect.resources/examples
+order: 3000

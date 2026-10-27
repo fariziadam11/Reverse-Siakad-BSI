@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/mahasiswa/jadwal-kuliah"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read schedule and teaching material links.resources/examples
+order: 7000

@@ -1,0 +1,11 @@
+version: 1
+id: 0da33ac1-a371-4665-8e91-21fa1d896dc8
+name: BSI local
+slug: bsi-local
+protocol: http
+port: 4500
+interceptRequests: false
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

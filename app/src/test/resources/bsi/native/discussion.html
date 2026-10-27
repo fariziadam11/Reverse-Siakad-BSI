@@ -1,0 +1,68 @@
+<!-- Synthetic/deidentified fixture derived from observed BSI structure, 2026-10-26. -->
+<div class="page-content"><div class="main-container">
+    <div class="main-container">
+     <div class="content-wrapper">
+      <div class="flash-tambah" data-flashdata=""></div>
+      <div class="flash-error" data-flasherror=""></div><!-- Row start -->
+      <div class="row gutters">
+       <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="task-section">
+         <!-- Row start -->
+         <div class="row no-gutters">
+          <div class="col-xl-1 col-lg-1 col-md-3 col-sm-3 col-4">
+           <div class="labels-container">
+            <div class="mt-5"></div>
+           </div>
+          </div>
+          <div class="col-xl-11 col-lg-11 col-md-9 col-sm-9 col-8">
+           <div class="tasks-container">
+            <div class="modal fade" id="addNewTask" tabindex="-1" role="dialog" aria-labelledby="addNewTaskLabel" aria-hidden="true">
+             <div class="modal-dialog" role="document">
+              <div class="modal-content">
+               <div class="modal-header">
+                <h5 class="modal-title" id="addNewTaskLabel">Input Forum Diskusi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+               </div>
+               <div class="modal-body">
+                <form class="row gutters" method="post" action="/tambah-diskusimhs" enctype="multipart/form-data">
+                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                  <div class="form-group mb-0">
+                   <input type="hidden" name="_token" value="TEST_CSRF" autocomplete="off"> <label for="addResss">Judul Diskusi*</label> <input class="form-control " type="text" name="judul" value=""> <label for="addResss">Isi Form Diskusi*</label> <textarea class="form-control " name="chat"></textarea> <label class="label">File Tambahan</label> <input type="file" name="file" id="file" class="form-control "> <code>File PDF Max 2MB</code> <input type="hidden" name="kd_lokal" value="KG.104.07.D"> <input type="hidden" name="kd_mtk" value="104">
+                  </div>
+                 </div>
+                </form>
+               </div>
+               <div class="modal-footer custom">
+                <div class="left-side">
+                 <button type="button" class="btn btn-link danger btn-block" data-dismiss="modal">Cancel</button>
+                </div>
+                <div class="divider"></div>
+                <div class="right-side">
+                 <button type="submit" class="btn btn-link success btn-block">Create</button>
+                </div>
+               </div>
+              </div>
+             </div>
+            </div>
+            <div class="tasks-header">
+             <h3>Forum Diskusi <span class="date" id="todays-date"></span></h3>
+             <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addNewTask">Add New Task</button>
+            </div>
+            <div class="tasksContainerScroll">
+             <!-- Row start -->
+             <div class="row no-gutters justify-content-center">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+               <section class="task-list">
+                <!-- Task #1 -->
+               </section>
+              </div>
+             </div><!-- Row end -->
+            </div>
+           </div>
+          </div>
+         </div><!-- Row end -->
+        </div>
+       </div>
+      </div><!-- Row end -->
+     </div>
+    </div></div></div>

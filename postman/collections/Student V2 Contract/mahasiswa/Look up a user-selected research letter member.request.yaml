@@ -1,0 +1,24 @@
+$kind: http-request
+description: JSON POST observed in the research letter form script. This lookup does not submit the letter. Use the current form CSRF token and only the identifier entered by the user.
+url: "{{baseUrl}}/mahasiswa/get-mahasiswa-by-nim"
+method: POST
+headers:
+  - key: X-CSRF-TOKEN
+    value: string
+    disabled: false
+    description: "(Required) "
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nim": "string"
+    }
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Look up a user-selected research letter member.resources/examples
+order: 1000

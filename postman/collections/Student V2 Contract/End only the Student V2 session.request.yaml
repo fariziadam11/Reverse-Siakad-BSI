@@ -1,0 +1,18 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/logout"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: _token
+      value: "{{csrfToken}}"
+      disabled: false
+      description: "(Required) "
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/End only the Student V2 session.resources/examples
+order: 4000

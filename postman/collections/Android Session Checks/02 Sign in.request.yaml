@@ -1,0 +1,26 @@
+$kind: http-request
+url: '{{baseUrl}}/login'
+method: POST
+order: 2000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+settings:
+  followRedirects: false
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: username, value: test-student}
+    - {key: password, value: test-password}
+    - {key: captcha_answer, value: AB3}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Sign-in redirects and rotates the session cookie', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/dashboard');
+        var cookie = pm.response.headers.get('Set-Cookie').split(';')[0];
+        pm.expect(cookie).not.to.eql(pm.collectionVariables.get('sessionCookie'));
+        pm.collectionVariables.set('sessionCookie', cookie);
+      });

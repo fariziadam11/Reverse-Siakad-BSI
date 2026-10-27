@@ -1,0 +1,39 @@
+$kind: http-example
+name: Script checks success and reads data fields. Live lookup status is not guaranteed.
+request:
+  url: "{{baseUrl}}/mahasiswa/get-mahasiswa-by-nim"
+  method: POST
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+    - key: X-CSRF-TOKEN
+      value: string
+      disabled: false
+      description: "(Required) "
+    - key: Accept
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "nim": "string"
+      }
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "data": {
+          "nama": "string",
+          "prodi": "string",
+          "hp": "string",
+          "jenjang": "string"
+        }
+      }
+order: 1000

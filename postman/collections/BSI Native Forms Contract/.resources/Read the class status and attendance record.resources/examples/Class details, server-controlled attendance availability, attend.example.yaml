@@ -1,0 +1,26 @@
+$kind: http-example
+name: Class details, server-controlled attendance availability, attendance tables and a lecturer questionnaire form. No active attendance action was available during inspection.
+request:
+  url: "{{baseUrl}}/absen-mhs/:opaqueId"
+  method: GET
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  pathVariables:
+    - key: opaqueId
+      value: string
+      disabled: false
+      description: (Required) Exact opaque value from an authenticated server link.
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

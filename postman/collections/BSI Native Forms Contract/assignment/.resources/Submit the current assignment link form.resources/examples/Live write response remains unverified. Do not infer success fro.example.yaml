@@ -1,0 +1,27 @@
+$kind: http-example
+name: Live write response remains unverified. Do not infer success from HTTP 200 alone.
+request:
+  url: "{{baseUrl}}/assignment"
+  method: POST
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: urlencoded
+    content:
+      _token: string
+      kd_mtk: string
+      id_tugas: string
+      nim: string
+      kd_lokal: string
+      isi: https://SWDZCJWaGPTjxTn.bydmmpWV8GR0
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

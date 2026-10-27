@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: MyBest native form contracts
+  version: 1.1.0
+  description: >-
+    Partial observed BSI HTML forms, inspected read-only on 2026-10-26.
+    Native clients preserve CSRF, session cookies, hidden fields and method overrides.
+    No academic or account form was submitted to the live server during inspection.
+    Defensive Android recovery distinguishes a stale form token (HTTP 419)
+    from expired authentication with one read-only dashboard check. It retains
+    an authenticated session and asks the user to refresh the form; it never
+    replays a rejected write. Live 419 behavior remains unverified.
+servers:
+  - url: https://elearning.bsi.ac.id
+security:
+  - webSession: []
+paths:
+  /profil:
+    get:
+      operationId: getProfileForms
+      summary: Read the profile and password forms
+      responses:
+        '200': {description: 'HTML forms for name/email and password, including _token and _method=patch.'}
+  /foto-profil/update:
+    post:
+      operationId: updateProfile
+      summary: Submit the current profile form
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, _method, name, email]
+              properties:
+                _token: {type: string}
+                _method: {type: string, enum: [patch]}
+                name: {type: string}
+                email: {type: string, format: email}
+      responses:
+        default: {description: 'Unverified live write response. Parse HTML validation and redirects; never replay a write automatically.'}
+  /profil/update:
+    post:
+      operationId: updatePassword
+      summary: Submit a user-completed password-change form
+      description: 'Observed requirements: at least 8 characters with uppercase, lowercase, digit and symbol; confirmation must match.'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, _method, current_password, password, password_confirmation]
+              properties:
+                _token: {type: string}
+                _method: {type: string, enum: [patch]}
+                current_password: {type: string, format: password}
+                password: {type: string, format: password, minLength: 8}
+                password_confirmation: {type: string, format: password}
+      responses:
+        default: {description: 'Unverified live write response. User performs all password entry and final submission in the app.'}
+  /absen-mhs/{opaqueId}:
+    get:
+      operationId: getClassAttendance
+      summary: Read the class status and attendance record
+      parameters:
+        - {$ref: '#/components/parameters/opaqueId'}
+      responses:
+        '200': {description: 'Class details, server-controlled attendance availability, attendance tables and a lecturer questionnaire form. No active attendance action was available during inspection.'}
+  /form-diskusimhs/{opaqueId}:
+    get:
+      operationId: getDiscussion
+      summary: Read the class discussion and current create form
+      parameters:
+        - {$ref: '#/components/parameters/opaqueId'}
+      responses:
+        '200': {description: 'HTML discussion entries and multipart create form. The submit button can be outside its form in legacy HTML.'}
+  /tambah-diskusimhs:
+    post:
+      operationId: createDiscussion
+      summary: Submit a discussion with optional PDF attachment
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                _token: {type: string}
+                kd_lokal: {type: string}
+                kd_mtk: {type: string}
+                judul: {type: string}
+                chat: {type: string}
+                file: {type: string, format: binary, description: 'Optional PDF, maximum 2 MB according to the observed form.'}
+      responses:
+        default: {description: 'Live write response remains unverified; preserve server validation and require explicit user submission.'}
+  /assignment/send/{opaqueId}:
+    get:
+      operationId: getAssignmentSubmission
+      summary: Read the current assignment submission form
+      parameters:
+        - {$ref: '#/components/parameters/opaqueId'}
+      responses:
+        '200': {description: 'The inspected assignment accepts an isi URL (Google Drive link), with hidden class/student/task fields. Other assignment forms must be read dynamically.'}
+  /assignment:
+    post:
+      operationId: submitAssignmentLink
+      summary: Submit the current assignment link form
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                _token: {type: string}
+                kd_mtk: {type: string}
+                id_tugas: {type: string}
+                nim: {type: string}
+                kd_lokal: {type: string}
+                isi: {type: string, format: uri}
+      responses:
+        default: {description: 'Live write response remains unverified. Do not infer success from HTTP 200 alone.'}
+  /download-file-tugas:
+    post:
+      operationId: downloadAssignmentAttachment
+      summary: Download an assignment attachment using its observed form
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, id, file]
+              properties:
+                _token: {type: string}
+                id: {type: string}
+                file: {type: string}
+      responses:
+        default: {description: 'Expected download from the observed Unduh form; stream the response and verify content disposition/type rather than parsing binary as HTML.'}
+components:
+  parameters:
+    opaqueId:
+      name: opaqueId
+      in: path
+      required: true
+      schema: {type: string}
+      description: Exact opaque value from an authenticated server link.
+  securitySchemes:
+    webSession:
+      type: apiKey
+      in: cookie
+      name: mybest_session

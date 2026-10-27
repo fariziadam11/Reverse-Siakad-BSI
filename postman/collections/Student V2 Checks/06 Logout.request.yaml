@@ -1,0 +1,21 @@
+$kind: http-request
+url: '{{baseUrl}}/logout'
+method: POST
+order: 6000
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+settings:
+  followRedirects: false
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: STUDENT_TEST_CSRF}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Logout returns the login destination', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/login');
+      });

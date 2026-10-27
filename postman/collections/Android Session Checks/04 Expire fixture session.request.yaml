@@ -1,0 +1,11 @@
+$kind: http-request
+url: '{{baseUrl}}/__expire'
+method: POST
+order: 4000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Synthetic session expiry succeeds', function () { pm.response.to.have.status(200); });

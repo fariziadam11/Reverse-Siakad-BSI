@@ -1,0 +1,4 @@
+$kind: collection
+description: 'Local synthetic simulation only. Checks the web contract without touching a real BSI account.'
+variables:
+  baseUrl: 'http://127.0.0.1:4900/bsi'

@@ -1,0 +1,6 @@
+simulation: student-v2
+routing: path
+mocks:
+  - name: Student V2 local
+    routeKey: student
+    path: ../mocks/student-v2/config.yaml

@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/reload-captcha"
+method: GET
+headers:
+  Accept: application/json
+settings: {}
+examples: ./.resources/Refresh the current security image.resources/examples
+order: 2000

@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/mahasiswa/khs"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read cumulative study results.resources/examples
+order: 5000

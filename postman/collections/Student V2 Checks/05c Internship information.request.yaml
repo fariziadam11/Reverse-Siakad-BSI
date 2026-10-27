@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/mahasiswa/beranda/info-pkl'
+method: GET
+order: 5700
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Available internship data carries the advertised guidance fields', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().data).to.include.all.keys('nim', 'nm_mhs', 'kd_lokal', 'nm_dosen', 'kd_dosen', 'info');
+      });

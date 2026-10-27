@@ -1,0 +1,24 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/download-file-tugas"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: _token
+      value: "{{csrfToken}}"
+      disabled: false
+      description: "(Required) "
+    - key: id
+      value: string
+      disabled: false
+      description: "(Required) "
+    - key: file
+      value: string
+      disabled: false
+      description: "(Required) "
+settings: {}
+examples: ./.resources/Download an assignment attachment using its observed form.resources/examples
+order: 7000

@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/assignment/:opaqueId"
+method: GET
+pathVariables:
+  - key: opaqueId
+    value: "{{opaqueId}}"
+    disabled: false
+    description: (Required) Exact encrypted ID from the authenticated schedule; do not decode or synthesize it.
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read assignments and returned grades.resources/examples
+order: 6000

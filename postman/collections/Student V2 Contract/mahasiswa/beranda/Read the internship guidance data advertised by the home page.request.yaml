@@ -1,0 +1,11 @@
+$kind: http-request
+description: URL comes from the authenticated home page infoPklCard data-url. Its script requests JSON and reveals the card only when data contains nonempty string fields. Empty or unavailable data is an expected state. Field names below are those consumed by the observed page, not a guarantee that each is returned for every account.
+url: "{{baseUrl}}/mahasiswa/beranda/info-pkl"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read the internship guidance data advertised by the home page.resources/examples
+order: 2000

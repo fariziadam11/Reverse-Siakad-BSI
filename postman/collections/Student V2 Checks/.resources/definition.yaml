@@ -1,0 +1,5 @@
+$kind: collection
+description: Local synthetic Student V2 checks. Never run these fixture mutations against BSI production.
+variables:
+  - key: baseUrl
+    value: 'http://127.0.0.1:4915/student'

@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/mahasiswa/krs"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read the current study plan.resources/examples
+order: 4000

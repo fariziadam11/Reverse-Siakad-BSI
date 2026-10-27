@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: MyBest observed web interface
+  version: 1.0.0
+  description: >-
+    Partial HTML interface observed on 2026-10-26, not an official BSI API.
+    The Android adapter uses normal web forms and cookies. Opaque class IDs
+    must be discovered from the authenticated schedule, never constructed.
+    Test examples are synthetic and contain no real account data.
+    A public login response observed on 2026-10-26 set mybest_session and
+    XSRF-TOKEN with Max-Age=2700 (45 minutes). This does not establish the
+    authenticated server-side session lifetime. Android treats HTTP 401 or
+    verified login redirection as expired authentication. After HTTP 419 it
+    checks the dashboard once before requesting login; a valid dashboard
+    means the form must be refreshed without repeating its submission.
+servers:
+  - url: https://elearning.bsi.ac.id
+paths:
+  /login:
+    get:
+      operationId: getLoginChallenge
+      summary: Load the sign-in form
+      description: Returns a CSRF hidden input and an SVG security challenge bound to the session cookie.
+      responses:
+        '200':
+          description: HTML form with username, password, captcha_answer and _token fields.
+          content:
+            text/html:
+              schema: {type: string}
+    post:
+      operationId: signIn
+      summary: Submit the login form
+      description: The user supplies the security code. Preserve cookies from GET and POST. A redirect alone does not prove success; verify the student dashboard.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, username, password, captcha_answer]
+              properties:
+                _token: {type: string, description: Hidden CSRF token from the current form.}
+                username: {type: string, description: User-supplied NIP or NIM.}
+                password: {type: string, format: password, description: User-supplied password.}
+                captcha_answer: {type: string, minLength: 3, maxLength: 3, description: Code from the current security image.}
+      responses:
+        '302': {description: Login submission redirects. Follow with the same cookie store and verify /user/dashboard.}
+        '200': {description: Form redisplayed; inspect server validation messages.}
+  /reload-captcha:
+    get:
+      operationId: reloadChallenge
+      summary: Refresh the current security image
+      responses:
+        '200':
+          description: JSON with an svg property; the existing cookie session must be retained.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  svg: {type: string}
+  /user/dashboard:
+    get:
+      operationId: getStudentDashboard
+      summary: Read the student dashboard
+      security: [{webSession: []}]
+      responses:
+        '200': {description: 'HTML with .user-display-name, .user-identifier, .sidebar-menu and guidance links.'}
+        '302': {description: An unauthenticated request redirects to login.}
+  /sch:
+    get:
+      operationId: getSchedule
+      summary: Read the current class schedule
+      security: [{webSession: []}]
+      responses:
+        '200': {description: 'HTML .jadwal-card elements with schedule details and server-generated class, discussion, learning and assignment links.'}
+        '302': {description: Login required.}
+  /learning/{opaqueId}:
+    get:
+      operationId: getLearningMaterials
+      summary: Read class learning resources
+      security: [{webSession: []}]
+      parameters:
+        - {$ref: '#/components/parameters/opaqueId'}
+      responses:
+        '200': {description: 'HTML tabs, additional-material tables, video iframes and .doc-block download links.'}
+  /assignment/{opaqueId}:
+    get:
+      operationId: getAssignments
+      summary: Read assignments and returned grades
+      security: [{webSession: []}]
+      parameters:
+        - {$ref: '#/components/parameters/opaqueId'}
+      responses:
+        '200': {description: HTML tables in tab panes for assignment data and returned grades. Submission and POST-only downloads use the official page.}
+  /logout:
+    post:
+      operationId: signOut
+      summary: End the web session
+      description: The form and CSRF input were observed. Remote sign-out was not exercised during account inspection.
+      security: [{webSession: []}]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                _token: {type: string}
+              required: [_token]
+      responses:
+        default: {description: Browser form response; exact remote status remains unverified.}
+components:
+  parameters:
+    opaqueId:
+      name: opaqueId
+      in: path
+      required: true
+      description: Exact encrypted ID from the authenticated schedule; do not decode or synthesize it.
+      schema: {type: string}
+  securitySchemes:
+    webSession:
+      type: apiKey
+      in: cookie
+      name: mybest_session

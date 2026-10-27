@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/sch"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read the current class schedule.resources/examples
+order: 4000

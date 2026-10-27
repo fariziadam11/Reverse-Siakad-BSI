@@ -1,0 +1,12 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/assignment/send/:opaqueId"
+method: GET
+pathVariables:
+  - key: opaqueId
+    value: "{{opaqueId}}"
+    disabled: false
+    description: (Required) Exact opaque value from an authenticated server link.
+settings: {}
+examples: ./.resources/Read the current assignment submission form.resources/examples
+order: 2000

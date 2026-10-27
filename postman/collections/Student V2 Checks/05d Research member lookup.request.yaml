@@ -1,0 +1,23 @@
+$kind: http-request
+url: '{{baseUrl}}/mahasiswa/get-mahasiswa-by-nim'
+method: POST
+order: 5800
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+  - key: Content-Type
+    value: application/json
+  - key: X-CSRF-TOKEN
+    value: STUDENT_TEST_CSRF
+body:
+  type: json
+  content: '{"nim":"TEST-NIM"}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('A requested synthetic member is looked up with JSON and the current CSRF', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().success).to.eql(true);
+        pm.expect(pm.response.json().data.nama).to.eql('TEST STUDENT');
+      });

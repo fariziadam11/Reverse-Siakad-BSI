@@ -1,0 +1,23 @@
+$kind: http-request
+url: '{{baseUrl}}/login'
+method: POST
+order: 2000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+settings:
+  followRedirects: false
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: username, value: test-student}
+    - {key: password, value: test-password}
+    - {key: captcha_answer, value: AB3}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Synthetic login rotates the cookie', function () {
+        pm.response.to.have.status(302);
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });

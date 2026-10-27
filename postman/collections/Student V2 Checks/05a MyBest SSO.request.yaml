@@ -1,0 +1,17 @@
+$kind: http-request
+url: '{{baseUrl}}/mahasiswa/myLMS'
+method: GET
+order: 5500
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Student SSO supplies the observed MyBest destination without forwarding cookies', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.eql('https://elearning.bsi.ac.id/authenticate-student?token=synthetic-sso');
+      });

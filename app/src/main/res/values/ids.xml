@@ -1,0 +1,6 @@
+<resources>
+    <item type="id" name="nav_home" />
+    <item type="id" name="nav_schedule" />
+    <item type="id" name="nav_services" />
+    <item type="id" name="nav_account" />
+</resources>

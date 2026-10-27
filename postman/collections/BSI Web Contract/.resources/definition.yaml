@@ -1,0 +1,21 @@
+$kind: collection
+description: Partial HTML interface observed on 2026-10-26, not an official BSI API. The Android adapter uses normal web forms and cookies. Opaque class IDs must be discovered from the authenticated schedule, never constructed. Test examples are synthetic and contain no real account data. A public login response observed on 2026-10-26 set mybest_session and XSRF-TOKEN with Max-Age=2700 (45 minutes). This does not establish the authenticated server-side session lifetime. Android treats HTTP 401 or verified login redirection as expired authentication. After HTTP 419 it checks the dashboard once before requesting login; a valid dashboard means the form must be refreshed without repeating its submission.
+variables:
+  baseUrl: https://elearning.bsi.ac.id
+  sessionCookie: ""
+  csrfToken: ""
+  username: ""
+  password: ""
+  captchaAnswer: ""
+  opaqueId: ""
+  name: ""
+  email: ""
+  currentPassword: ""
+  passwordConfirmation: ""
+  assignmentUrl: ""
+
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      pm.request.headers.upsert({ key: 'Cookie', value: pm.collectionVariables.get('sessionCookie') || '' });

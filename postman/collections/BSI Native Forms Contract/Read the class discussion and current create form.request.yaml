@@ -1,0 +1,12 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/form-diskusimhs/:opaqueId"
+method: GET
+pathVariables:
+  - key: opaqueId
+    value: "{{opaqueId}}"
+    disabled: false
+    description: (Required) Exact opaque value from an authenticated server link.
+settings: {}
+examples: ./.resources/Read the class discussion and current create form.resources/examples
+order: 4000

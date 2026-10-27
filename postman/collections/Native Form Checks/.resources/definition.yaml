@@ -1,0 +1,4 @@
+$kind: collection
+description: 'Local-only native form contract checks using synthetic data. Do not point this collection at a real BSI account.'
+variables:
+  baseUrl: 'http://127.0.0.1:4901/bsi'

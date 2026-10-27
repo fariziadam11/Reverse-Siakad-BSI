@@ -1,0 +1,16 @@
+$kind: http-request
+description: GET URL and consumed JSON fields observed in the authenticated jadwal-mengajar page script. Lecturer code comes from data-kd on its Lihat Jadwal control. Preserve the supplied code; do not enumerate it.
+url: "{{baseUrl}}/get-jadwal-dosen/:lecturerCode"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: lecturerCode
+    value: string
+    disabled: false
+    description: "(Required) "
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read the selected lecturer schedule.resources/examples
+order: 2000

@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Reverse" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#1E3A8A</item>
+        <item name="colorPrimaryVariant">#172554</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#5B21B6</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">#172554</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#F5F7FB</item>
+        <!-- Customize your theme here. -->
+    </style>
+</resources>

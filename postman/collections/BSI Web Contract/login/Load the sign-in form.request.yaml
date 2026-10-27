@@ -1,0 +1,9 @@
+$kind: http-request
+description: Returns a CSRF hidden input and an SVG security challenge bound to the session cookie.
+url: "{{baseUrl}}/login"
+method: GET
+headers:
+  Accept: text/html
+settings: {}
+examples: ./.resources/Load the sign-in form.resources/examples
+order: 1000

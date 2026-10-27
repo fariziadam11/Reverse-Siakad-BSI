@@ -1,0 +1,16 @@
+$kind: http-request
+url: '{{baseUrl}}/sch'
+method: GET
+order: 5000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Expired session redirects to login', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/login');
+      });

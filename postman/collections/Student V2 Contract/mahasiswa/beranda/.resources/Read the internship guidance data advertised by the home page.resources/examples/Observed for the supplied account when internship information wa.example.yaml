@@ -1,0 +1,21 @@
+$kind: http-example
+name: Observed for the supplied account when internship information was unavailable; hide the unloaded card.
+request:
+  url: "{{baseUrl}}/mahasiswa/beranda/info-pkl"
+  method: GET
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 204
+  statusText: No Content
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,22 @@
+$kind: http-example
+name: Official MyBest authentication URL in Location.
+request:
+  url: "{{baseUrl}}/mahasiswa/myLMS"
+  method: GET
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 302
+  statusText: Found
+  headers:
+    Location: https://zAiohAvAc.qivwmZi34Zljk5kjunKSnhSyhlU3KldIsIV6TV,LjL
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

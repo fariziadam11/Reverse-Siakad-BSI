@@ -1,0 +1,16 @@
+$kind: http-request
+url: '{{baseUrl}}/profil'
+method: GET
+order: 3000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Profile exposes the observed method override and fields', function () {
+        pm.response.to.have.status(200);
+        ['_method', 'current_password', 'password_confirmation', 'email', '/foto-profil/update'].forEach(function (field) {
+          pm.expect(pm.response.text()).to.include(field);
+        });
+      });

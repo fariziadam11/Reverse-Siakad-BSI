@@ -1,0 +1,8 @@
+workflows:
+  syncSpecToCollection:
+    - spec: ../postman/specs/bsi-web.yaml
+      collection: ../postman/collections/BSI Web Contract
+    - spec: ../postman/specs/bsi-native-forms.yaml
+      collection: ../postman/collections/BSI Native Forms Contract
+    - spec: ../postman/specs/student-v2.yaml
+      collection: ../postman/collections/Student V2 Contract

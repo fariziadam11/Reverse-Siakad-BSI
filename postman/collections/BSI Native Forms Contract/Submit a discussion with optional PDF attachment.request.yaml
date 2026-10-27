@@ -1,0 +1,31 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/tambah-diskusimhs"
+method: POST
+headers:
+  Accept: text/html
+body:
+  type: formdata
+  content:
+    - type: text
+      key: _token
+      value: "{{csrfToken}}"
+    - type: text
+      key: kd_lokal
+      value: string
+    - type: text
+      key: kd_mtk
+      value: string
+    - type: text
+      key: judul
+      value: string
+    - type: text
+      key: chat
+      value: string
+    - type: file
+      key: file
+      src: ""
+      description: Optional PDF, maximum 2 MB according to the observed form.
+settings: {}
+examples: ./.resources/Submit a discussion with optional PDF attachment.resources/examples
+order: 5000

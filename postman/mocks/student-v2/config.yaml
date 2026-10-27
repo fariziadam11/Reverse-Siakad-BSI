@@ -1,0 +1,10 @@
+version: 1
+name: Student V2 local
+slug: student-v2-local
+protocol: http
+port: 4515
+interceptRequests: false
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

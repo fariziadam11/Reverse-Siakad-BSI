@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/mahasiswa/khs-semester?semester=string"
+method: GET
+queryParams:
+  - key: semester
+    value: string
+    disabled: false
+    description: Exact option value from the current GET form.
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read results for the selected semester.resources/examples
+order: 6000

@@ -1,0 +1,17 @@
+$kind: http-request
+url: '{{baseUrl}}/get-jadwal-dosen/TEST-LECTURER'
+method: GET
+order: 5600
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('The selected lecturer schedule has the fields consumed by the page', function () {
+        pm.response.to.have.status(200);
+        var schedule = pm.response.json();
+        pm.expect(schedule).to.be.an('array');
+        pm.expect(schedule[0]).to.include.all.keys('kd_mtk', 'nm_mtk', 'sks', 'hari', 'jam', 'ruang');
+      });

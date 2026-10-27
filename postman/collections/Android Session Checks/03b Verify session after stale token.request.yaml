@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/user/dashboard'
+method: GET
+order: 3200
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Authentication can remain valid after HTTP 419', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('user-display-name');
+        pm.expect(pm.response.text()).not.to.include('captcha_answer');
+      });

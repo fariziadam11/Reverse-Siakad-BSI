@@ -1,0 +1,65 @@
+$kind: http-example
+name: Inspect server validation and resulting page. Exact live status unverified.
+request:
+  url: "{{baseUrl}}/mahasiswa/perubahan-biodata"
+  method: POST
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: formdata
+    content:
+      - type: text
+        key: _token
+        value: string
+        description: "(Required) "
+      - type: text
+        key: email
+        value: k7i@ChVYBDVy.zg
+        description: "(Required) "
+      - type: text
+        key: telp
+        value: string
+        description: "(Required) "
+      - type: text
+        key: keterangan
+        value: string
+        description: "(Required) "
+      - type: file
+        key: surat_pengajuan
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: ktp
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: kk
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: akte_lahir
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: ktm
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: ijasah
+        src: ""
+        description: "(Required) "
+      - type: file
+        key: transkip
+        src: ""
+        description: "(Required) "
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

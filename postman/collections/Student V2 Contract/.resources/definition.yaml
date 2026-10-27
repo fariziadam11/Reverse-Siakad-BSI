@@ -1,0 +1,18 @@
+$kind: collection
+description: Partial HTML interface observed read-only on 2026-10-26 at students.bsi.ac.id. Not an official BSI API. Native controls preserve server forms, hidden values, query parameters and opaque links. Account mutations were not submitted live. Session cookies are isolated from elearning.bsi.ac.id. Examples use synthetic data.
+variables:
+  baseUrl: https://students.bsi.ac.id
+  sessionCookie: ""
+  csrfToken: ""
+  username: ""
+  password: ""
+  currentPassword: ""
+  newPassword: ""
+  newPasswordConfirmation: ""
+
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      const cookie = pm.variables.get("sessionCookie");
+      if (cookie) pm.request.headers.upsert({key: "Cookie", value: cookie});

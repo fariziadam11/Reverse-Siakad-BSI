@@ -1,0 +1,27 @@
+$kind: http-request
+url: '{{baseUrl}}/assignment'
+method: POST
+order: 6000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+  - {key: Referer, value: '{{baseUrl}}/assignment/send/fixture-id'}
+settings:
+  followRedirects: false
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: kd_mtk, value: '104'}
+    - {key: id_tugas, value: TEST_TASK}
+    - {key: nim, value: TEST_NIM}
+    - {key: kd_lokal, value: TEST_CLASS}
+    - {key: isi, value: 'https://example.invalid/synthetic-assignment'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Assignment accepts the current hidden fields and link', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/assignment/send/');
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });

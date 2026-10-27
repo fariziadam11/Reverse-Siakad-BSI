@@ -1,0 +1,23 @@
+$kind: http-request
+url: '{{baseUrl}}/mahasiswa/password'
+method: POST
+order: 5000
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: STUDENT_TEST_CSRF}
+    - {key: current_password, value: synthetic}
+    - {key: new_password, value: one}
+    - {key: new_password_confirmation, value: two}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Rejected fixture form returns validation HTML without losing auth', function () {
+        pm.response.to.have.status(422);
+        pm.expect(pm.response.text()).to.include('invalid-feedback');
+        pm.expect(pm.response.text()).to.include('student-sidebar-profile__name');
+      });

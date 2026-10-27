@@ -1,0 +1,20 @@
+$kind: http-request
+url: '{{baseUrl}}/foto-profil/update'
+method: POST
+order: 5000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: _method, value: patch}
+    - {key: email, value: invalid}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Validation remains HTML with HTTP 422', function () {
+        pm.response.to.have.status(422);
+        pm.expect(pm.response.text()).to.include('Email tidak valid.');
+      });

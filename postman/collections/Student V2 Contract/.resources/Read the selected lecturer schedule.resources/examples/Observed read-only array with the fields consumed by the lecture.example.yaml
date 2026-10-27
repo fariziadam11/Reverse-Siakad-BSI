@@ -1,0 +1,26 @@
+$kind: http-example
+name: Observed read-only array with the fields consumed by the lecturer schedule page.
+request:
+  url: "{{baseUrl}}/get-jadwal-dosen/:lecturerCode"
+  method: GET
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  pathVariables:
+    - key: lecturerCode
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

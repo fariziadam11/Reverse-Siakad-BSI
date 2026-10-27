@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/mahasiswa/khs-semester?semester=1'
+method: GET
+order: 4000
+headers:
+  - key: Cookie
+    value: '{{sessionCookie}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Semester query returns the selected semester', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('id="semester-result">Semester 1');
+      });

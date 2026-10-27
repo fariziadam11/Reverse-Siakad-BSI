@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: Student V2 observed web interface
+  version: 1.0.0
+  description: >-
+    Partial HTML interface observed read-only on 2026-10-26 at students.bsi.ac.id.
+    Not an official BSI API. Native controls preserve server forms, hidden values,
+    query parameters and opaque links. Account mutations were not submitted live.
+    Session cookies are isolated from elearning.bsi.ac.id. Examples use synthetic data.
+servers:
+  - url: https://students.bsi.ac.id
+paths:
+  /mahasiswa/get-mahasiswa-by-nim:
+    post:
+      operationId: studentResearchMemberLookup
+      summary: Look up a user-selected research letter member
+      description: JSON POST observed in the research letter form script. This lookup does not submit the letter. Use the current form CSRF token and only the identifier entered by the user.
+      security: [{studentSession: []}]
+      parameters:
+        - name: X-CSRF-TOKEN
+          in: header
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nim]
+              properties:
+                nim: {type: string}
+      responses:
+        default:
+          description: Script checks success and reads data fields. Live lookup status is not guaranteed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  data:
+                    type: object
+                    properties:
+                      nama: {type: string}
+                      prodi: {type: string}
+                      hp: {type: string}
+                      jenjang: {type: string}
+  /get-jadwal-dosen/{lecturerCode}:
+    get:
+      operationId: studentLecturerSchedule
+      summary: Read the selected lecturer schedule
+      description: >-
+        GET URL and consumed JSON fields observed in the authenticated
+        jadwal-mengajar page script. Lecturer code comes from data-kd on its
+        Lihat Jadwal control. Preserve the supplied code; do not enumerate it.
+      security: [{studentSession: []}]
+      parameters:
+        - name: lecturerCode
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Observed read-only array with the fields consumed by the lecturer schedule page.
+        default:
+          description: The page expects an array; exact live error statuses remain unverified.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    kd_mtk: {}
+                    nm_mtk: {}
+                    sks: {}
+                    hari: {}
+                    jam: {}
+                    ruang: {}
+  /mahasiswa/beranda/info-pkl:
+    get:
+      operationId: studentInternshipInfo
+      summary: Read the internship guidance data advertised by the home page
+      description: >-
+        URL comes from the authenticated home page infoPklCard data-url.
+        Its script requests JSON and reveals the card only when data contains
+        nonempty string fields. Empty or unavailable data is an expected state.
+        Field names below are those consumed by the observed page, not a
+        guarantee that each is returned for every account.
+      security: [{studentSession: []}]
+      responses:
+        '204': {description: Observed for the supplied account when internship information was unavailable; hide the unloaded card.}
+        default:
+          description: Inspect available JSON data. Eligibility for other accounts remains unverified.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      nim: {type: string, nullable: true}
+                      nm_mhs: {type: string, nullable: true}
+                      kd_lokal: {type: string, nullable: true}
+                      nm_dosen: {type: string, nullable: true}
+                      kd_dosen: {type: string, nullable: true}
+                      info: {type: string, nullable: true}
+  /mahasiswa/myLMS:
+    get:
+      operationId: studentMyBestSso
+      summary: Obtain the official MyBest SSO redirect
+      description: >-
+        Observed read-only: authenticated Student V2 returns an HTTPS redirect to
+        elearning.bsi.ac.id/authenticate-student with an opaque token query parameter.
+        Open it with the separate MyBest cookie store and verify /user/dashboard.
+        Do not persist tokens or forward Student cookies across origins.
+      security: [{studentSession: []}]
+      responses:
+        '302':
+          description: Official MyBest authentication URL in Location.
+          headers:
+            Location:
+              schema: {type: string, format: uri}
+  /login:
+    get:
+      operationId: studentLoginForm
+      summary: Read the current Student V2 sign-in form
+      responses:
+        '200':
+          description: HTML form with _token, username, password and optional remember. CAPTCHA can be conditional; render current server controls without solving it.
+          content:
+            text/html:
+              schema: {type: string}
+    post:
+      operationId: studentSignIn
+      summary: Submit the current sign-in form
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, username, password]
+              properties:
+                _token: {type: string}
+                username: {type: string}
+                password: {type: string, format: password}
+                remember: {type: string, description: Optional server Remember me control; only sent after user selection.}
+              additionalProperties: {type: string}
+      responses:
+        '302': {description: 'Observed redirect to /dashboard then /mahasiswa/beranda, or an intended MyLMS URL after a previous unauthenticated request. An external SSO redirect is not followed by the Student login transport; verify the Student home with its own cookies.'}
+        '200': {description: HTML sign-in form with validation or conditional CAPTCHA.}
+        default: {description: Upstream failure; do not replay submitted forms automatically.}
+  /mahasiswa/beranda:
+    get:
+      operationId: studentHome
+      summary: Read student identity and available navigation
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: 'HTML .app-content and .app-sidebar with student-sidebar-profile__name and student-sidebar-profile__nim.'}
+        '302': {description: Unauthenticated request redirects to /login.}
+  /mahasiswa/krs:
+    get:
+      operationId: studentKrs
+      summary: Read the current study plan
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: HTML course table and server-provided CETAK link.}
+  /mahasiswa/khs:
+    get:
+      operationId: studentKhs
+      summary: Read cumulative study results
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: 'HTML course table and cumulative totals, including an empty result for a new student.'}
+  /mahasiswa/khs-semester:
+    get:
+      operationId: studentSemesterKhs
+      summary: Read results for the selected semester
+      security: [{studentSession: []}]
+      parameters:
+        - name: semester
+          in: query
+          description: Exact option value from the current GET form.
+          schema: {type: string}
+      responses:
+        '200': {description: HTML semester select form and available results.}
+  /mahasiswa/jadwal-kuliah:
+    get:
+      operationId: studentSchedule
+      summary: Read schedule and teaching material links
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: 'HTML schedule table, printable page and per-course RPS, silabus, slide and RTM links.'}
+  /mahasiswa/data-pribadi:
+    get:
+      operationId: studentProfile
+      summary: Read personal information
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: HTML labelled disabled controls and a link to the biodata change application.}
+  /mahasiswa/password:
+    get:
+      operationId: studentPasswordForm
+      summary: Read the change-password form
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: 'HTML form with _token, current_password, new_password and new_password_confirmation.'}
+    post:
+      operationId: studentChangePassword
+      summary: Submit a user-confirmed password change
+      description: Form observed only. Remote mutation and status codes were not exercised. Never automatically replay.
+      security: [{studentSession: []}]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token, current_password, new_password, new_password_confirmation]
+              properties:
+                _token: {type: string}
+                current_password: {type: string, format: password}
+                new_password: {type: string, format: password}
+                new_password_confirmation: {type: string, format: password}
+      responses:
+        default: {description: Inspect server validation and resulting page. Exact live status unverified.}
+  /mahasiswa/perubahan-biodata:
+    get:
+      operationId: studentBiodataForm
+      summary: Read the biodata change application
+      security: [{studentSession: []}]
+      responses:
+        '200': {description: 'HTML multipart form with email, telp, keterangan and seven required PDF attachments.'}
+    post:
+      operationId: studentBiodataApplication
+      summary: Submit a user-confirmed biodata application
+      description: Form observed only. Follow current required fields and file rules; never automatically replay.
+      security: [{studentSession: []}]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [_token, email, telp, keterangan, surat_pengajuan, ktp, kk, akte_lahir, ktm, ijasah, transkip]
+              properties:
+                _token: {type: string}
+                email: {type: string, format: email}
+                telp: {type: string}
+                keterangan: {type: string}
+                surat_pengajuan: {type: string, format: binary}
+                ktp: {type: string, format: binary}
+                kk: {type: string, format: binary}
+                akte_lahir: {type: string, format: binary}
+                ktm: {type: string, format: binary}
+                ijasah: {type: string, format: binary}
+                transkip: {type: string, format: binary}
+      responses:
+        default: {description: Inspect server validation and resulting page. Exact live status unverified.}
+  /logout:
+    post:
+      operationId: studentSignOut
+      summary: End only the Student V2 session
+      security: [{studentSession: []}]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [_token]
+              properties:
+                _token: {type: string}
+      responses:
+        default: {description: Logout form observed. Clear Student V2 cookies locally after logout; preserve e-learning cookies.}
+components:
+  securitySchemes:
+    studentSession:
+      type: apiKey
+      in: cookie
+      name: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session

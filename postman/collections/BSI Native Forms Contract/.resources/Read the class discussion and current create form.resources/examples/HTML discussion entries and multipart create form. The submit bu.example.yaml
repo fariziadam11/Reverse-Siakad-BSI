@@ -1,0 +1,26 @@
+$kind: http-example
+name: HTML discussion entries and multipart create form. The submit button can be outside its form in legacy HTML.
+request:
+  url: "{{baseUrl}}/form-diskusimhs/:opaqueId"
+  method: GET
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  pathVariables:
+    - key: opaqueId
+      value: string
+      disabled: false
+      description: (Required) Exact opaque value from an authenticated server link.
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

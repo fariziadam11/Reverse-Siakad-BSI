@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/login'
+method: GET
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Student form includes CSRF and normal account controls', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('name="username"');
+        pm.expect(pm.response.text()).to.include('name="password"');
+        pm.expect(pm.response.text()).to.include('STUDENT_TEST_CSRF');
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });

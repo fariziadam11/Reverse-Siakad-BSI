@@ -1,0 +1,18 @@
+$kind: http-request
+description: The form and CSRF input were observed. Remote sign-out was not exercised during account inspection.
+url: "{{baseUrl}}/logout"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: _token
+      value: "{{csrfToken}}"
+      disabled: false
+      description: "(Required) "
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/End the web session.resources/examples
+order: 7000

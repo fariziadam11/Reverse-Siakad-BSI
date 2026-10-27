@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/user/dashboard"
+method: GET
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Read the student dashboard.resources/examples
+order: 3000

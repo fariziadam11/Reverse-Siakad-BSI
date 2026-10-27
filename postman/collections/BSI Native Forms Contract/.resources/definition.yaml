@@ -1,0 +1,23 @@
+$kind: collection
+description: Partial observed BSI HTML forms, inspected read-only on 2026-10-26. Native clients preserve CSRF, session cookies, hidden fields and method overrides. No academic or account form was submitted to the live server during inspection. Defensive Android recovery distinguishes a stale form token (HTTP 419) from expired authentication with one read-only dashboard check. It retains an authenticated session and asks the user to refresh the form; it never replays a rejected write. Live 419 behavior remains unverified.
+variables:
+  baseUrl: https://elearning.bsi.ac.id
+  sessionCookie: ""
+  csrfToken: ""
+  username: ""
+  password: ""
+  captchaAnswer: ""
+  opaqueId: ""
+  name: ""
+  email: ""
+  currentPassword: ""
+  passwordConfirmation: ""
+  assignmentUrl: ""
+auth:
+  type: noauth
+
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      pm.request.headers.upsert({ key: 'Cookie', value: pm.collectionVariables.get('sessionCookie') || '' });

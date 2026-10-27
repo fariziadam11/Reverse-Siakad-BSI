@@ -1,0 +1,9 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/login"
+method: GET
+headers:
+  Accept: text/html
+settings: {}
+examples: ./.resources/Read the current Student V2 sign-in form.resources/examples
+order: 1000

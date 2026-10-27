@@ -1,0 +1,21 @@
+$kind: http-request
+url: '{{baseUrl}}/download-file-tugas'
+method: POST
+order: 8000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: id, value: fixture-id}
+    - {key: file, value: fixture.pdf}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('POST-only download is a PDF response', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');
+        pm.expect(pm.response.text()).to.match(/^%PDF-/);
+      });

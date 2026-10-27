@@ -1,0 +1,58 @@
+$kind: http-request
+description: Form observed only. Follow current required fields and file rules; never automatically replay.
+url: "{{baseUrl}}/mahasiswa/perubahan-biodata"
+method: POST
+headers:
+  Content-Type: multipart/form-data
+body:
+  type: formdata
+  content:
+    - type: text
+      key: _token
+      value: string
+      description: "(Required) "
+    - type: text
+      key: email
+      value: k7i@ChVYBDVy.zg
+      description: "(Required) "
+    - type: text
+      key: telp
+      value: string
+      description: "(Required) "
+    - type: text
+      key: keterangan
+      value: string
+      description: "(Required) "
+    - type: file
+      key: surat_pengajuan
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: ktp
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: kk
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: akte_lahir
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: ktm
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: ijasah
+      src: ""
+      description: "(Required) "
+    - type: file
+      key: transkip
+      src: ""
+      description: "(Required) "
+auth:
+  type: noauth
+settings: {}
+examples: ./.resources/Submit a user-confirmed biodata application.resources/examples
+order: 2000

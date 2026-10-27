@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/absen-mhs/fixture-id'
+method: GET
+order: 9000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Class preserves server-controlled attendance availability', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('Belum Mulai');
+        pm.expect(pm.response.text()).to.include('Rekap Absen');
+      });

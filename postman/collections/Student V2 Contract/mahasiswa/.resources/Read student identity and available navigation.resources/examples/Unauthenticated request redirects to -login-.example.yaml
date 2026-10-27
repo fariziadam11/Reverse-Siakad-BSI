@@ -1,0 +1,21 @@
+$kind: http-example
+name: Unauthenticated request redirects to /login.
+request:
+  url: "{{baseUrl}}/mahasiswa/beranda"
+  method: GET
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 302
+  statusText: Found
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 2000

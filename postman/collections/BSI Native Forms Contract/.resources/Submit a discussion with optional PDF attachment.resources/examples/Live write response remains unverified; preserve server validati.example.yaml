@@ -1,0 +1,45 @@
+$kind: http-example
+name: Live write response remains unverified; preserve server validation and require explicit user submission.
+request:
+  url: "{{baseUrl}}/tambah-diskusimhs"
+  method: POST
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: formdata
+    content:
+      - type: text
+        key: _token
+        value: string
+        description: ""
+      - type: text
+        key: kd_lokal
+        value: string
+        description: ""
+      - type: text
+        key: kd_mtk
+        value: string
+        description: ""
+      - type: text
+        key: judul
+        value: string
+        description: ""
+      - type: text
+        key: chat
+        value: string
+        description: ""
+      - type: file
+        key: file
+        src: ""
+        description: Optional PDF, maximum 2 MB according to the observed form.
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

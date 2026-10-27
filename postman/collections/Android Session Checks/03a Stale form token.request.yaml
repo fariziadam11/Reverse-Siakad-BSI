@@ -1,0 +1,18 @@
+$kind: http-request
+url: '{{baseUrl}}/foto-profil/update'
+method: POST
+order: 3100
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: STALE}
+    - {key: email, value: fixture@example.invalid}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('A stale form is rejected with HTTP 419', function () {
+        pm.response.to.have.status(419);
+      });

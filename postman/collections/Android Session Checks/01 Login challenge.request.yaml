@@ -1,0 +1,14 @@
+$kind: http-request
+url: '{{baseUrl}}/login'
+method: GET
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      pm.test('Login page contains CSRF and CAPTCHA controls', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('name="_token"');
+        pm.expect(pm.response.text()).to.include('name="captcha_answer"');
+      });

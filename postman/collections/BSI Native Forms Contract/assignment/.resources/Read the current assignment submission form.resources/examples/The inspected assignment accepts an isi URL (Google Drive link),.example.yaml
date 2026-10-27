@@ -1,0 +1,26 @@
+$kind: http-example
+name: The inspected assignment accepts an isi URL (Google Drive link), with hidden class/student/task fields. Other assignment forms must be read dynamically.
+request:
+  url: "{{baseUrl}}/assignment/send/:opaqueId"
+  method: GET
+  headers:
+    - key: mybest_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  pathVariables:
+    - key: opaqueId
+      value: string
+      disabled: false
+      description: (Required) Exact opaque value from an authenticated server link.
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

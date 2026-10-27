@@ -1,0 +1,33 @@
+$kind: http-example
+name: Login submission redirects. Follow with the same cookie store and verify /user/dashboard.
+request:
+  url: "{{baseUrl}}/login"
+  method: POST
+  body:
+    type: urlencoded
+    content:
+      - key: _token
+        value: string
+        disabled: false
+        description: (Required) Hidden CSRF token from the current form.
+      - key: username
+        value: string
+        disabled: false
+        description: (Required) User-supplied NIP or NIM.
+      - key: password
+        value: string
+        disabled: false
+        description: (Required) User-supplied password.
+      - key: captcha_answer
+        value: str
+        disabled: false
+        description: (Required) Code from the current security image.
+response:
+  statusCode: 302
+  statusText: Found
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 2000

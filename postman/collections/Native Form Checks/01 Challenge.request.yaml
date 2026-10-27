@@ -1,0 +1,13 @@
+$kind: http-request
+url: '{{baseUrl}}/login'
+method: GET
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Synthetic challenge is session-bound', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('captcha_answer');
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });

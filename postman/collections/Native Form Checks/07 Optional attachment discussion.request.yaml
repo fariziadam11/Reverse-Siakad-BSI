@@ -1,0 +1,26 @@
+$kind: http-request
+url: '{{baseUrl}}/tambah-diskusimhs'
+method: POST
+order: 7000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+  - {key: Referer, value: '{{baseUrl}}/form-diskusimhs/fixture-id'}
+settings:
+  followRedirects: false
+body:
+  type: formdata
+  content:
+    - {key: _token, type: text, value: TEST_CSRF}
+    - {key: kd_mtk, type: text, value: '104'}
+    - {key: kd_lokal, type: text, value: TEST_CLASS}
+    - {key: judul, type: text, value: Synthetic Discussion}
+    - {key: chat, type: text, value: Synthetic Content}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Discussion accepts multipart without an optional PDF', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/form-diskusimhs/');
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });

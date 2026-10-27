@@ -1,0 +1,28 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/login"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: _token
+      value: "{{csrfToken}}"
+      disabled: false
+      description: "(Required) "
+    - key: username
+      value: "{{username}}"
+      disabled: false
+      description: "(Required) "
+    - key: password
+      value: "{{password}}"
+      disabled: false
+      description: "(Required) "
+    - key: remember
+      value: string
+      disabled: false
+      description: Optional server Remember me control; only sent after user selection.
+settings: {}
+examples: ./.resources/Submit the current sign-in form.resources/examples
+order: 2000

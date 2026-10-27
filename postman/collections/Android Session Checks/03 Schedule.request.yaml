@@ -1,0 +1,16 @@
+$kind: http-request
+url: '{{baseUrl}}/sch'
+method: GET
+order: 3000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Schedule exposes server-provided learning and assignment links', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('jadwal-card');
+        pm.expect(pm.response.text()).to.include('/learning/');
+        pm.expect(pm.response.text()).to.include('/assignment/');
+      });

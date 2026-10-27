@@ -1,0 +1,11 @@
+<!doctype html><html><body>
+<!-- Synthetic test fixture matching the observed BSI form structure. -->
+<form action="/login" method="post">
+  <input type="hidden" name="_token" value="TEST_CSRF">
+  <input name="username" type="number">
+  <input name="password" type="password">
+  <div id="captcha-svg-container"><svg xmlns="http://www.w3.org/2000/svg" width="150" height="46" viewBox="0 0 150 46"><text x="20" y="30">A</text><text x="60" y="30">B</text><text x="100" y="30">3</text></svg></div>
+  <input name="captcha_answer" maxlength="3">
+  <button type="submit">Masuk</button>
+</form>
+</body></html>

@@ -1,0 +1,18 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/assignment"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    _token: "{{csrfToken}}"
+    kd_mtk: string
+    id_tugas: string
+    nim: string
+    kd_lokal: string
+    isi: "{{assignmentUrl}}"
+settings: {}
+examples: ./.resources/Submit the current assignment link form.resources/examples
+order: 1000

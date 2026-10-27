@@ -1,0 +1,37 @@
+$kind: http-example
+name: Inspect server validation and resulting page. Exact live status unverified.
+request:
+  url: "{{baseUrl}}/mahasiswa/password"
+  method: POST
+  headers:
+    - key: s_i_a_k_a_d-_universitas_bina_sarana_informatika_session
+      value: <API Key>
+      description: "Added as a part of security scheme: apikey"
+  body:
+    type: urlencoded
+    content:
+      - key: _token
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: current_password
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: new_password
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: new_password_confirmation
+        value: string
+        disabled: false
+        description: "(Required) "
+response:
+  statusCode: 500
+  statusText: Internal Server Error
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

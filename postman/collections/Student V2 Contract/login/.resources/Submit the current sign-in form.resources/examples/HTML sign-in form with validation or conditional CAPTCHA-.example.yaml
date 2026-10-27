@@ -1,0 +1,33 @@
+$kind: http-example
+name: HTML sign-in form with validation or conditional CAPTCHA.
+request:
+  url: "{{baseUrl}}/login"
+  method: POST
+  body:
+    type: urlencoded
+    content:
+      - key: _token
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: username
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: password
+        value: string
+        disabled: false
+        description: "(Required) "
+      - key: remember
+        value: string
+        disabled: false
+        description: Optional server Remember me control; only sent after user selection.
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

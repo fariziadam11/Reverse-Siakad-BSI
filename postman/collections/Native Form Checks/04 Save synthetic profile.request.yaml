@@ -1,0 +1,25 @@
+$kind: http-request
+url: '{{baseUrl}}/foto-profil/update'
+method: POST
+order: 4000
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+  - {key: Referer, value: '{{baseUrl}}/profil'}
+settings:
+  followRedirects: false
+body:
+  type: urlencoded
+  content:
+    - {key: _token, value: TEST_CSRF}
+    - {key: _method, value: patch}
+    - {key: name, value: Synthetic Profile}
+    - {key: email, value: fixture@example.invalid}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Profile form redirects with a rotated session', function () {
+        pm.response.to.have.status(302);
+        pm.expect(pm.response.headers.get('Location')).to.include('/profil');
+        pm.collectionVariables.set('sessionCookie', pm.response.headers.get('Set-Cookie').split(';')[0]);
+      });
