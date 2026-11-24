@@ -50,7 +50,7 @@ function multipartParts(req, body) {
 }
 
 async function handle(req, res) {
-  const pathname = new URL(req.url, 'http://localhost').pathname;
+  const pathname = new URL(req.url, 'http://localhost').pathname.replace(/^\/bsi(?=\/|$)/, '') || '/';
   let sid = /(?:^|;\s*)test_session=([^;]+)/.exec(req.headers.cookie || '')?.[1];
   if (!sid || !sessions.has(sid)) {
     sid = crypto.randomBytes(12).toString('hex');
@@ -81,6 +81,8 @@ async function handle(req, res) {
   if (!session.authenticated) return redirect(res, '/login');
   if (pathname === '/user/dashboard') return reply(res, 200, dashboard);
   if (pathname === '/sch') return reply(res, 200, scheduleHtml);
+  if (pathname === '/__changed/sch') return reply(res, 200, '<main><div class="new-schedule-layout">Synthetic incompatible schedule</div></main>');
+  if (pathname === '/__empty/sch') return reply(res, 200, '<main><p>Belum ada jadwal kuliah.</p></main>');
   if (pathname === '/learning/fixture-id') return reply(res, 200, fs.readFileSync(path.join(fixtures, 'learning.html'), 'utf8'));
   if (pathname === '/assignment/fixture-id') return reply(res, 200, fs.readFileSync(path.join(fixtures, 'assignments.html'), 'utf8'));
   if (pathname === '/absen-mhs/fixture-id') return reply(res, 200, nativeFixture('class'));

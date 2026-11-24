@@ -1,5 +1,7 @@
 package com.gis.reverse
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.ActivityNotFoundException
@@ -7,8 +9,11 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.PictureDrawable
+import android.graphics.drawable.RippleDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Build
@@ -32,6 +37,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModelProvider
 import com.caverock.androidsvg.SVG
@@ -43,6 +49,7 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.jsoup.nodes.Document
@@ -52,11 +59,16 @@ import java.io.File
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-    private val navy = Color.rgb(30, 58, 138)
-    private val ink = Color.rgb(15, 23, 42)
-    private val muted = Color.rgb(71, 85, 105)
-    private val canvas = Color.rgb(245, 247, 251)
-    private val purple = Color.rgb(91, 33, 182)
+    // Organic design tokens live in colors.xml; resources are only ready after attach, hence lazy.
+    private val ink by lazy { c(R.color.text) }
+    private val muted by lazy { c(R.color.neutral_700) }
+    private val canvas by lazy { c(R.color.bg) }
+    private val surface by lazy { c(R.color.surface) }
+    private val accent by lazy { c(R.color.accent) }
+    private val caprasimo by lazy { ResourcesCompat.getFont(this, R.font.caprasimo)!! }
+    private val figtree by lazy { ResourcesCompat.getFont(this, R.font.figtree_regular)!! }
+    private val figtreeSemi by lazy { ResourcesCompat.getFont(this, R.font.figtree_semibold)!! }
+    private val figtreeBold by lazy { ResourcesCompat.getFont(this, R.font.figtree_bold)!! }
     private val worker = Executors.newSingleThreadExecutor()
     private lateinit var client: BsiClient
     private lateinit var studentClient: StudentPortalClient
@@ -64,7 +76,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var root: LinearLayout
     private lateinit var body: FrameLayout
     private lateinit var toolbar: MaterialToolbar
-    private lateinit var progress: ProgressBar
     private lateinit var status: TextView
     private lateinit var bottom: BottomNavigationView
     private var epoch = 0
@@ -87,6 +98,8 @@ class MainActivity : AppCompatActivity() {
     private var pendingDownload: Array<String>? = null
 
     private data class Route(val kind: String, val title: String, val url: String)
+    // A soft circle behind a card: offset from the card's right edge and its top (or bottom) edge; negative bleeds off.
+    private data class Blob(val color: Int, val size: Int, val right: Int, val y: Int, val fromBottom: Boolean = false)
 
     private val filePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         val pending = formState.pendingFile
@@ -130,36 +143,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(root)
         WindowCompat.getInsetsController(window, root).isAppearanceLightStatusBars = true
         if (Build.VERSION.SDK_INT >= 27) {
-            window.navigationBarColor = Color.WHITE
+            window.navigationBarColor = c(R.color.neutral_100)
             WindowCompat.getInsetsController(window, root).isAppearanceLightNavigationBars = true
         }
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            if (::body.isInitialized && ::bottom.isInitialized && body.findViewWithTag<View>("discussion-composer") != null) {
+                bottom.visibility = if (insets.isVisible(WindowInsetsCompat.Type.ime())) View.GONE else View.VISIBLE
+            }
             WindowInsetsCompat.CONSUMED
         }
         toolbar = MaterialToolbar(this).apply {
-            setBackgroundColor(Color.WHITE); setTitleTextColor(ink); setSubtitleTextColor(muted)
+            setBackgroundColor(canvas); minimumHeight = dp(60)
+            setTitleTextAppearance(context, R.style.TextAppearance_Reverse_Bar)
+            setSubtitleTextAppearance(context, R.style.TextAppearance_Reverse_BarSub)
+            setNavigationIconTint(ink)
             title = "MyBest"; subtitle = "Universitas Bina Sarana Informatika"
         }
         root.addView(toolbar, LinearLayout.LayoutParams(-1, -2))
-        progress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
-            isIndeterminate = true; indeterminateTintList = ColorStateList.valueOf(navy); visibility = View.GONE
-        }
-        root.addView(progress, LinearLayout.LayoutParams(-1, dp(3)))
-        status = text("", 13, muted).apply { setPadding(dp(20), dp(6), dp(20), dp(6)); visibility = View.GONE }
+        status = text("", 13, muted).apply { setPadding(dp(20), dp(6), dp(20), dp(6)); visibility = View.GONE; accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE }
         root.addView(status)
         body = FrameLayout(this)
         root.addView(body, LinearLayout.LayoutParams(-1, 0, 1f))
         bottom = BottomNavigationView(this).apply {
             visibility = View.GONE
-            setBackgroundColor(Color.WHITE)
+            // The only shadow in the app: content scrolls under this fixed bar.
+            setBackgroundColor(c(R.color.neutral_100)); elevation = dp(8).toFloat()
+            itemActiveIndicatorColor = ColorStateList.valueOf(c(R.color.accent_200))
             menu.add(0, R.id.nav_home, 0, "Beranda").setIcon(R.drawable.ic_home)
             menu.add(0, R.id.nav_schedule, 1, "Jadwal").setIcon(R.drawable.ic_calendar)
             menu.add(0, R.id.nav_services, 2, "Layanan").setIcon(R.drawable.ic_book)
             menu.add(0, R.id.nav_account, 3, "Akun").setIcon(R.drawable.ic_account)
             labelVisibilityMode = NavigationBarView.LABEL_VISIBILITY_LABELED
-            itemIconTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(navy, muted))
+            itemIconTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(c(R.color.accent_800), muted))
             itemTextColor = itemIconTintList
             setOnItemSelectedListener { item ->
                 if (submitting) return@setOnItemSelectedListener false
@@ -219,13 +236,13 @@ class MainActivity : AppCompatActivity() {
     private fun navigate(next: Route, remember: Boolean = true) {
         if (submitting) return
         epoch++
-        progress.visibility = View.GONE
         status.visibility = View.GONE
         if (remember && !loggingIn && next != route) history.addLast(route)
         route = next
         loggingIn = false
         studentLoginVisible = false
         getPreferences(MODE_PRIVATE).edit().putString("portal", if (next.kind == "student") "student" else "mybest").apply()
+        toolbar.visibility = View.VISIBLE
         toolbar.title = if (next.kind == "student") "Student V2" else "MyBest"
         toolbar.subtitle = next.title
         toolbar.menu.clear()
@@ -265,25 +282,31 @@ class MainActivity : AppCompatActivity() {
             acceptDashboard(doc)
             courses = PortalParser.courses(schedule)
             val content = content()
-            val welcome = panel(content, navy)
-            welcome.addView(text("Selamat datang", 14, Color.WHITE))
-            welcome.addView(text(student.name.ifBlank { "Mahasiswa BSI" }, 25, Color.WHITE, true))
-            welcome.addView(text(student.identifier, 14, Color.WHITE))
+            val welcome = panel(content).apply { setPadding(dp(24), dp(26), dp(24), dp(24)) }
+            blobs(welcome, c(R.color.accent_700), 36, Blob(c(R.color.accent_600), 170, -50, -60), Blob(c(R.color.accent_800), 70, 60, -30, true))
+            welcome.addView(text("Selamat datang", 14, canvas))
+            welcome.addView(display(student.name.ifBlank { "Mahasiswa BSI" }, 28, canvas).also { it.setPadding(0, dp(6), 0, dp(6)) })
+            welcome.addView(text(student.identifier, 14, canvas))
             heading(content, "Perkuliahan hari ini")
             val today = courses.filter { it.today }
             if (today.isEmpty()) empty(content, "Tidak ada jadwal kuliah hari ini", "Jadwal untuk hari lainnya tersedia di tab Jadwal.")
             else today.forEach { courseCard(content, it) }
-            action(content, "Lihat semua jadwal") { bottom.selectedItemId = R.id.nav_schedule }
+            action(content, "Lihat semua jadwal", false) { bottom.selectedItemId = R.id.nav_schedule }.paint(Color.TRANSPARENT, ink, c(R.color.neutral_400))
             heading(content, "Panduan mahasiswa")
             val guides = PortalParser.main(doc).select(".panduan-item[href]").map {
                 PortalLink(it.select(".font-weight-bold").text().ifBlank { "Panduan mahasiswa" }, it.absUrl("href"))
             }
-            guides.forEach { link -> action(content, link.title, false) { openLink(link) } }
+            guides.forEach { link -> row(content, link.title, fill = c(R.color.neutral_100), icon = R.drawable.ic_file, leadFill = c(R.color.accent_2_200), leadInk = c(R.color.accent_2_800)) { openLink(link) } }
             val rules = PortalParser.main(doc).select(".rule-text")
             if (rules.isNotEmpty()) {
                 heading(content, "Aturan ujian")
-                val box = panel(content)
-                rules.forEachIndexed { index, rule -> box.addView(text("${index + 1}. ${rule.text()}", 14, muted).also { it.setPadding(0, dp(6), 0, dp(6)) }) }
+                val box = panel(content, c(R.color.neutral_100)).apply { setPadding(dp(20), dp(10), dp(20), dp(10)) }
+                rules.forEachIndexed { index, rule ->
+                    val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(10), 0, dp(10)) }
+                    line.addView(text("${index + 1}", 13, c(R.color.accent_800), true).apply { gravity = Gravity.CENTER; background = oval(c(R.color.accent_200)) }, LinearLayout.LayoutParams(dp(26), dp(26)).apply { rightMargin = dp(12) })
+                    line.addView(text(rule.text(), 14, c(R.color.neutral_800)).also { it.setPadding(0, dp(3), 0, 0) }, LinearLayout.LayoutParams(0, -2, 1f))
+                    box.addView(line)
+                }
             }
         })
     }
@@ -314,10 +337,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun courseCard(parent: LinearLayout, course: Course) {
         val card = panel(parent)
-        card.addView(text(if (course.today) "Hari ini · ${course.schedule}" else course.schedule, 14, navy, true))
-        card.addView(text(course.title, 20, ink, true).also { it.setPadding(0, dp(8), 0, dp(8)) })
+        // The chip marks the one real state on this card: the class is today.
+        if (course.today) card.addView(chip("Hari ini", c(R.color.accent_2_100), c(R.color.accent_2_800)).also { (it.layoutParams as LinearLayout.LayoutParams).bottomMargin = dp(8) })
+        card.addView(text(course.schedule, 14, c(R.color.accent_700), true))
+        card.addView(display(course.title, 21).also { it.setPadding(0, dp(6), 0, dp(6)) })
         card.addView(text(listOf(course.classroom, course.credits).filter { it.isNotBlank() }.joinToString(" · "), 14, muted))
-        card.addView(text(listOf("Dosen ${course.lecturer}", course.room, course.campus).filter { it.isNotBlank() }.joinToString(" · "), 14, muted))
+        card.addView(text(listOf(course.lecturer.takeIf { it.isNotBlank() }?.let { "Dosen $it" }.orEmpty(), course.room, course.campus).filter { it.isNotBlank() }.joinToString(" · "), 14, muted))
         course.links.forEach { link -> action(card, link.title, link.title.contains("Buka Kelas", true)) { openLink(link.copy(title = "${link.title} · ${course.title}")) } }
     }
 
@@ -329,10 +354,15 @@ class MainActivity : AppCompatActivity() {
             heading(content, next.title)
             heading(content, "Dokumen pembelajaran")
             if (data.documents.isEmpty()) empty(content, "Belum ada dokumen", "Materi yang tersedia di BSI akan muncul di sini.")
-            data.documents.forEach { link -> action(content, "Unduh ${link.title}", false) { openLink(link) } }
+            data.documents.forEach { link ->
+                row(content, link.title, radius = 28, icon = R.drawable.ic_file, leadFill = c(R.color.accent_200), leadInk = c(R.color.accent_800),
+                    trail = R.drawable.ic_download, trailInk = c(R.color.accent_700)) { openLink(link) }.contentDescription = "Unduh ${link.title}"
+            }
             heading(content, "Video pembelajaran")
             if (data.videos.isEmpty()) empty(content, "Belum ada video", "Dosen belum menambahkan video pada halaman ini.")
-            data.videos.forEach { link -> action(content, link.title, false) { openExternal(link.url) } }
+            data.videos.forEach { link ->
+                row(content, link.title, "Dibuka di aplikasi video", radius = 28, icon = R.drawable.ic_play, leadFill = c(R.color.accent_2_200), leadInk = c(R.color.accent_2_800), trail = 0) { openExternal(link.url) }
+            }
             data.tables.forEach { renderTable(content, it, "Belum ada materi tambahan") }
         })
     }
@@ -354,7 +384,7 @@ class MainActivity : AppCompatActivity() {
         fun row(parent: LinearLayout, row: TableRow) {
             val box = panel(parent)
             val title = row.fields.firstOrNull { it.first.contains("Judul", true) || it.first.contains("Mata", true) }
-            title?.let { box.addView(text(it.second, 19, ink, true)) }
+            title?.let { box.addView(display(it.second, 20)) }
             row.fields.filter { it != title }.forEach { (key, value) ->
                 box.addView(text("$key: $value", 14, muted).also { it.setPadding(0, dp(4), 0, dp(4)) })
             }
@@ -373,6 +403,7 @@ class MainActivity : AppCompatActivity() {
             val filtered = table.rows.filter { item -> item.fields.any { (label, value) -> "$label $value".contains(search.text.toString(), true) } }
             summary.text = "${minOf(shown, filtered.size)} dari ${filtered.size} baris"
             list.removeAllViews()
+            if (filtered.isEmpty()) empty(list, "Tidak ada hasil", "Ubah kata pencarian Anda.")
             filtered.take(shown).forEach { row(list, it) }
             more.visibility = if (filtered.size > shown) View.VISIBLE else View.GONE
         }
@@ -388,9 +419,13 @@ class MainActivity : AppCompatActivity() {
     private fun showServices() {
         val content = content()
         heading(content, "Layanan mahasiswa", "Akses menu yang tersedia pada akun BSI Anda.")
-        action(content, "Student V2") { openStudent() }
+        val hero = panel(content).apply { setPadding(dp(20), dp(22), dp(20), dp(22)); setOnClickListener { openStudent() } }
+        blobs(hero, c(R.color.accent_2_700), 36, Blob(c(R.color.accent_2_600), 140, -40, -50))
+        ripple(hero, 36)
+        hero.addView(display("Student V2", 24, canvas))
+        hero.addView(text("KRS, KHS, kalender akademik, jadwal dosen dan form akademik.", 14, canvas).apply { maxWidth = dp(250); setPadding(0, dp(6), 0, 0) })
         navigation.filter { !it.url.endsWith("/user/dashboard") && !it.url.endsWith("/profil") && Uri.parse(it.url).path !in listOf("/student-2", "/halaman-ujian") }.forEach { link ->
-            action(content, link.title, false) { openLink(link) }
+            row(content, link.title, initial = link.title.take(1), leadFill = canvas, leadInk = c(R.color.accent_700)) { openLink(link) }
         }
         if (navigation.isEmpty()) action(content, "Muat menu BSI") { bottom.selectedItemId = R.id.nav_home }
     }
@@ -459,8 +494,9 @@ class MainActivity : AppCompatActivity() {
         epoch++
         val content = content()
         heading(content, "Menu Student V2", "Layanan yang tersedia pada akun Anda.")
-        action(content, "Beranda Student V2", false) { navigate(Route("student", "Student V2", StudentPortalParser.HOME)) }
-        action(content, "Masuk ke MyBest melalui BSI") { recoverMyBest(Route("home", "Beranda", "/user/dashboard")) }
+        action(content, "Beranda Student V2", false) { navigate(Route("student", "Student V2", StudentPortalParser.HOME)) }.paint(c(R.color.accent_2_100), c(R.color.accent_2_800))
+        action(content, "Masuk ke MyBest melalui BSI") { recoverMyBest(Route("home", "Beranda", "/user/dashboard")) }.paint(c(R.color.accent_2_700), canvas)
+        val dots = listOf(c(R.color.accent_300), c(R.color.accent_2_300), c(R.color.neutral_400))
         val search = input(content, "Cari layanan akademik", InputType.TYPE_CLASS_TEXT).second
         val list = column()
         content.addView(list)
@@ -468,7 +504,7 @@ class MainActivity : AppCompatActivity() {
             list.removeAllViews()
             val links = studentNavigation.filter { it.title.contains(query, true) && Uri.parse(it.url).path != "/mahasiswa/myLMS" }
             if (links.isEmpty()) empty(list, "Layanan tidak ditemukan", "Ubah pencarian atau muat ulang halaman Student V2.")
-            links.forEach { link -> action(list, link.title, false) { openLink(link) } }
+            links.forEachIndexed { index, link -> row(list, link.title, radius = 28, leadFill = dots[index % dots.size]) { openLink(link) } }
         }
         search.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -496,7 +532,7 @@ class MainActivity : AppCompatActivity() {
             val content = content()
             heading(content, "Masuk ke Student V2", "Universitas Bina Sarana Informatika")
             content.addView(text(message, 14, muted))
-            if (current.error.isNotBlank()) content.addView(text(current.error, 14, Color.rgb(153, 27, 27)))
+            if (current.error.isNotBlank()) content.addView(text(current.error, 14, c(R.color.accent_700)))
             if (current.captchaPrompt.isNotBlank()) content.addView(text(current.captchaPrompt, 16, ink))
             if (current.captchaSvg.isNotBlank()) {
                 val image = ImageView(this).apply {
@@ -592,17 +628,23 @@ class MainActivity : AppCompatActivity() {
     private fun showProfile() {
         val content = content()
         heading(content, "Akun saya")
-        val box = panel(content)
-        box.addView(text(student.name, 23, ink, true))
-        box.addView(text(student.identifier, 16, muted))
-        box.addView(text(student.email, 15, muted))
+        val box = panel(content).apply { setPadding(dp(24), dp(24), dp(24), dp(24)) }
+        blobs(box, surface, 36, Blob(c(R.color.accent_200), 120, -30, -40, true))
+        box.addView(display(student.name, 24))
+        box.addView(text(student.identifier, 15, muted).also { it.setPadding(0, dp(6), 0, 0) })
+        box.addView(text(student.email, 14, muted))
         heading(content, "Sesi dan login")
         content.addView(text("Sesi dipakai kembali saat aplikasi dibuka. Jika sesi BSI berakhir, Anda akan diarahkan ke login dengan tujuan sebelumnya tetap tersimpan. Kode keamanan baru perlu diisi saat diminta BSI.", 15, muted))
         val saved = vault.read() != null
-        content.addView(text(if (saved) "Akun diingat pada perangkat ini." else "Password tidak disimpan pada perangkat ini.", 14, muted).also { it.setPadding(0, dp(12), 0, 0) })
-        if (saved) action(content, "Hapus akun tersimpan", false) { vault.clear(); showProfile() }
-        action(content, "Edit profil dan password", false) { navigate(Route("native", "Pengaturan profil", "/profil")) }
-        action(content, "Keluar dari akun", false) { confirmLogout() }
+        content.addView(chip(if (saved) "Akun diingat pada perangkat ini." else "Password tidak disimpan pada perangkat ini.",
+            c(if (saved) R.color.accent_2_100 else R.color.neutral_100), c(if (saved) R.color.accent_2_800 else R.color.neutral_800))
+            .also { (it.layoutParams as LinearLayout.LayoutParams).apply { topMargin = dp(14); bottomMargin = dp(8) } })
+        if (saved) action(content, "Hapus akun tersimpan", false) { vault.clear(); showProfile() }.paint(Color.TRANSPARENT, ink, c(R.color.neutral_400))
+        action(content, "Edit profil dan password", false) { navigate(Route("native", "Pengaturan profil", "/profil")) }.paint(Color.TRANSPARENT, ink, c(R.color.neutral_400))
+        action(content, "Keluar dari akun", false) { confirmLogout() }.apply {
+            icon = AppCompatResources.getDrawable(context, R.drawable.ic_logout); iconSize = dp(18); iconTint = ColorStateList.valueOf(c(R.color.accent_800))
+            iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START; iconPadding = dp(10)
+        }
     }
 
     private fun openLink(link: PortalLink) {
@@ -648,15 +690,24 @@ class MainActivity : AppCompatActivity() {
         challenge = null
         toolbar.title = "MyBest"; toolbar.subtitle = "Login mahasiswa"
         toolbar.menu.clear(); toolbar.navigationIcon = null
+        // The wordmark hero replaces the app bar on this screen.
+        toolbar.visibility = View.GONE
         bottom.visibility = View.GONE
         val content = content()
-        val logo = ImageView(this).apply { setImageResource(R.drawable.mybest_logo); scaleType = ImageView.ScaleType.FIT_CENTER; contentDescription = "MyBest BSI" }
-        content.addView(logo, LinearLayout.LayoutParams(-1, dp(90)).apply { bottomMargin = dp(16) })
-        heading(content, "Masuk ke MyBest", "E-learning Universitas Bina Sarana Informatika")
-        val notice = text(message, 14, muted)
-        content.addView(notice)
-        action(content, "Masuk MyBest lewat Student V2", false) { openStudent(true) }
-        action(content, "Buka portal Student V2", false) { openStudent() }
+        val hero = column().apply { gravity = Gravity.BOTTOM; setPadding(dp(24), 0, dp(24), dp(16)) }
+        content.addView(hero, LinearLayout.LayoutParams(-1, dp(150)).apply { leftMargin = -dp(20); rightMargin = -dp(20); bottomMargin = dp(8) })
+        blobs(hero, Color.TRANSPARENT, 0, Blob(c(R.color.accent_200), 220, -60, -90), Blob(c(R.color.accent_2_200), 110, 120, 40))
+        hero.addView(display("MyBest", 44, c(R.color.accent_700)).apply { contentDescription = "MyBest BSI" })
+        hero.addView(text("Universitas Bina Sarana Informatika", 13, muted).apply { typeface = figtreeSemi; setPadding(0, dp(6), 0, 0) })
+        heading(content, "Masuk ke MyBest", "E-learning Universitas Bina Sarana Informatika", page = true)
+        val notice = text(message, 14, c(R.color.neutral_800)).apply {
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
+            setPadding(dp(16), dp(12), dp(16), dp(12)); background = round(c(R.color.neutral_100), 20)
+        }
+        content.addView(notice, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
+        fun warn(text: String) {
+            notice.text = text; notice.background = round(c(R.color.accent_100), 20); notice.setTextColor(c(R.color.accent_800))
+        }
         val saved = vault.read()
         val (nimLayout, nim) = input(content, "NIP / NIM", InputType.TYPE_CLASS_NUMBER)
         nim.setText(username.ifBlank { saved?.first.orEmpty() })
@@ -665,29 +716,37 @@ class MainActivity : AppCompatActivity() {
         pass.setText(password.ifBlank { saved?.second.orEmpty() })
         pass.isSaveEnabled = false
         heading(content, "Kode keamanan")
+        val captcha = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        content.addView(captcha, LinearLayout.LayoutParams(-1, dp(72)).apply { topMargin = dp(10) })
         val image = ImageView(this).apply {
             setLayerType(View.LAYER_TYPE_SOFTWARE, null)
             contentDescription = "Gambar kode keamanan BSI. Isi tiga karakter yang terlihat pada gambar."
             scaleType = ImageView.ScaleType.FIT_CENTER
+            background = round(surface, 24)
         }
-        content.addView(image, LinearLayout.LayoutParams(-1, dp(72)))
+        captcha.addView(image, LinearLayout.LayoutParams(0, -1, 1f))
+        val refresh = ImageButton(this).apply {
+            setImageResource(R.drawable.ic_refresh); imageTintList = ColorStateList.valueOf(c(R.color.accent_2_800))
+            background = round(c(R.color.accent_2_100), 24); contentDescription = "Ganti kode keamanan"
+        }
+        ripple(refresh, 24)
+        captcha.addView(refresh, LinearLayout.LayoutParams(dp(72), -1).apply { leftMargin = dp(10) })
         val (codeLayout, code) = input(content, "3 karakter pada gambar", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS)
         code.filters = arrayOf(InputFilter.LengthFilter(3)); code.isSaveEnabled = false
-        val refresh = action(content, "Ganti kode keamanan", false) { }
-        val remember = MaterialCheckBox(this).apply { text = "Ingat akun pada perangkat ini"; isChecked = saved != null; minHeight = dp(48); setTextColor(ink) }
-        content.addView(remember)
-        content.addView(text("Jika dipilih, NIM dan password disimpan terenkripsi untuk mengisi login berikutnya. CAPTCHA tetap diisi saat diminta BSI.", 13, muted))
+        val remember = MaterialCheckBox(this).apply { text = "Ingat akun pada perangkat ini"; isChecked = saved != null; minHeight = dp(48); setTextColor(ink); textSize = 15f; typeface = figtree }
+        content.addView(remember, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(12) })
+        content.addView(text("Jika dipilih, NIM dan password disimpan terenkripsi untuk mengisi login berikutnya. CAPTCHA tetap diisi saat diminta BSI.", 13, muted).also { it.setPadding(dp(34), 0, 0, 0) })
         val submit = action(content, "Masuk ke akun") { }
-        submit.backgroundTintList = ColorStateList.valueOf(purple)
+        (submit.layoutParams as LinearLayout.LayoutParams).topMargin = dp(22)
         submit.isEnabled = false
         fun refreshChallenge() {
             submit.isEnabled = false; refresh.isEnabled = false; code.setText("")
             task("Memuat kode keamanan", { client.challenge() }, { next ->
                 challenge = next
                 try { image.setImageDrawable(PictureDrawable(SVG.getFromString(next.svg).renderToPicture())) }
-                catch (_: Exception) { notice.text = "Gambar kode keamanan gagal ditampilkan. Coba lagi atau gunakan situs resmi."; refresh.isEnabled = true; return@task }
+                catch (_: Exception) { warn("Gambar kode keamanan gagal ditampilkan. Coba lagi atau gunakan situs resmi."); refresh.isEnabled = true; return@task }
                 submit.isEnabled = true; refresh.isEnabled = true
-            }, { error -> notice.text = friendly(error); refresh.isEnabled = true })
+            }, { error -> warn(friendly(error)); refresh.isEnabled = true })
         }
         refresh.setOnClickListener { refreshChallenge() }
         submit.setOnClickListener {
@@ -714,14 +773,20 @@ class MainActivity : AppCompatActivity() {
                         getPreferences(MODE_PRIVATE).edit().putBoolean("manualMyBestLogout", false).apply()
                         val target = pendingRoute ?: Route("home", "Beranda", "/user/dashboard")
                         pendingRoute = null; history.clear(); navigate(target, false)
-                    }, { error -> notice.text = friendly(error); refreshChallenge() })
+                    }, { error -> warn(friendly(error)); refreshChallenge() })
                 }
             }
         }
         action(content, "Lupa password?", false) {
             history.addLast(Route("login", "Login mahasiswa", "/login"))
             navigate(Route("public", "Lupa password", "/forgot-password"), false)
-        }
+        }.paint(Color.TRANSPARENT, c(R.color.accent_700)).also { (it.layoutParams as LinearLayout.LayoutParams).apply { width = -2; gravity = Gravity.CENTER_HORIZONTAL } }
+        val sso = panel(content, c(R.color.accent_2_100)).apply { setPadding(dp(20), dp(22), dp(20), dp(22)) }
+        (sso.layoutParams as LinearLayout.LayoutParams).topMargin = dp(22)
+        sso.addView(display("Student V2", 20, c(R.color.accent_2_900)).apply { ViewCompat.setAccessibilityHeading(this, true) })
+        sso.addView(text("Gunakan akun Student V2 untuk mengakses layanan mahasiswa atau masuk ke MyBest.", 14, c(R.color.accent_2_800)).also { it.setPadding(0, dp(8), 0, dp(4)) })
+        action(sso, "Masuk MyBest lewat Student V2", false) { openStudent(true) }.paint(c(R.color.accent_2_700), canvas)
+        action(sso, "Buka portal Student V2", false) { openStudent() }.paint(Color.TRANSPARENT, c(R.color.accent_2_800), c(R.color.accent_2_400))
         refreshChallenge()
     }
 
@@ -751,28 +816,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderNative(doc: Document, next: Route, parsed: NativePage? = null) {
         val page = parsed ?: if (next.kind == "student") StudentPortalParser.page(doc) else NativePortalParser.page(doc)
-        val content = content()
-        heading(content, next.title)
+        val commentForm = page.forms.firstOrNull { Uri.parse(it.action).path == "/send-komentarmhs" }
+        val content = content(commentForm)
+        heading(content, when {
+            commentForm != null -> page.paragraphs.firstOrNull().orEmpty().ifBlank { "Komentar" }
+            Uri.parse(next.url).path.orEmpty().startsWith("/form-diskusimhs/") -> "Diskusi per pertemuan"
+            else -> next.title
+        })
         if (next.kind == "student") action(content, "Menu Student V2", false) { showStudentMenu() }
         if (next.kind == "student" && Uri.parse(next.url).path == StudentPortalParser.HOME && internshipFacts.isNotEmpty()) {
             heading(content, "Informasi PKL")
             val box = panel(content)
             internshipFacts.forEach { (key, value) -> box.addView(text("$key: $value", 15, ink)) }
         }
-        page.notices.forEach { notice -> content.addView(text(notice.text, 14, if (notice.error) Color.rgb(153, 27, 27) else muted)) }
+        page.notices.forEach { notice -> content.addView(text(notice.text, 14, if (notice.error) c(R.color.accent_700) else muted)) }
         if (page.facts.isNotEmpty()) {
             val box = panel(content)
             page.facts.forEach { (label, value) -> box.addView(text("$label: $value", 15, ink)) }
         }
-        page.statuses.forEach { value -> panel(content).addView(text(value, 17, navy, true)) }
-        page.paragraphs.forEach { value -> content.addView(text(value, 15, muted).also { it.setPadding(0, dp(8), 0, dp(8)) }) }
+        page.statuses.forEach { value -> panel(content).addView(text(value, 17, c(R.color.accent_700), true)) }
+        (if (commentForm != null) page.paragraphs.drop(1) else page.paragraphs).forEach { value -> content.addView(text(value, 15, muted).also { it.setPadding(0, dp(8), 0, dp(8)) }) }
+        page.topics.forEach { topic ->
+            val box = panel(content, c(R.color.accent_2_100))
+            box.addView(display(topic.title, 20, c(R.color.accent_2_900)))
+            if (topic.description.isNotBlank()) box.addView(text(topic.description, 14, c(R.color.accent_2_900)).also { it.setPadding(0, dp(8), 0, dp(8)) })
+            if (topic.author.isNotBlank()) box.addView(text(topic.author, 13, c(R.color.accent_2_800)))
+            if (topic.time.isNotBlank()) box.addView(text(topic.time, 13, c(R.color.accent_2_800)))
+            topic.forms.forEach { renderForm(box, it) }
+            topic.links.forEach { link -> action(box, link.title, false) { openLink(link.copy(title = "${topic.title} · ${link.title}")) } }
+        }
+        page.comments.forEach { comment ->
+            val box = panel(content, c(R.color.neutral_100), 28).apply { setPadding(dp(18), dp(16), dp(18), dp(16)) }
+            if (comment.name.isNotBlank()) box.addView(text(comment.name, 14, ink, true))
+            if (comment.identifier.isNotBlank()) box.addView(text("NIM/NIP: ${comment.identifier}", 13, muted))
+            box.addView(text(comment.message, 14, ink).also { it.setPadding(0, dp(6), 0, dp(6)) })
+            if (comment.time.isNotBlank()) box.addView(text(comment.time, 13, muted))
+        }
+        if (commentForm != null && page.comments.isEmpty()) empty(content, "Belum ada komentar", "Jadilah yang pertama berkomentar pada pertemuan ini.")
         page.tables.forEach { renderTable(content, it, "Belum ada data pada bagian ini") }
         page.links.forEach { link -> action(content, link.title, false) { openLink(link) } }
-        if (Uri.parse(next.url).path.orEmpty().contains("diskusi") && page.links.isEmpty() && page.paragraphs.size <= 1) {
+        if (Uri.parse(next.url).path.orEmpty().contains("diskusi") && page.topics.isEmpty() && page.links.isEmpty() && page.paragraphs.size <= 1) {
             empty(content, "Belum ada diskusi", "Anda dapat membuat topik diskusi melalui form di bawah.")
         }
-        page.forms.forEach { form -> renderForm(panel(content), form) }
-        if (page.forms.isEmpty() && page.tables.isEmpty() && page.paragraphs.isEmpty() && page.facts.isEmpty() && page.notices.isEmpty()) {
+        page.forms.filter { it !== commentForm }.forEach { form -> renderForm(panel(content), form) }
+        if (page.forms.isEmpty() && page.tables.isEmpty() && page.paragraphs.isEmpty() && page.facts.isEmpty() && page.notices.isEmpty() && page.comments.isEmpty() && page.topics.isEmpty()) {
             empty(content, "Belum ada informasi pada halaman ini", "Muat ulang untuk memeriksa data terbaru dari BSI.")
         }
     }
@@ -960,19 +1047,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun <T> task(label: String, block: () -> T, success: (T) -> Unit, failure: ((Exception) -> Unit)? = null) {
         val token = epoch
-        progress.visibility = View.VISIBLE; status.text = label; status.visibility = View.VISIBLE
+        status.text = label; status.visibility = View.VISIBLE
         worker.execute {
             try {
                 val result = block()
                 runOnUiThread {
                     if (isDestroyed || token != epoch) return@runOnUiThread
-                    progress.visibility = View.GONE; status.visibility = View.GONE
+                    status.visibility = View.GONE
                     success(result)
                 }
             } catch (error: Exception) {
                 runOnUiThread {
                     if (isDestroyed || token != epoch) return@runOnUiThread
-                    progress.visibility = View.GONE; status.visibility = View.GONE
+                    status.visibility = View.GONE
                     if (failure != null) failure(error)
                     else if (error is SessionExpired) { if (route.kind == "student") studentExpired() else expired() }
                     else showError(error) { navigate(route, false) }
@@ -997,16 +1084,54 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadingScreen(message: String) {
         val content = content()
-        content.addView(text(message, 17, muted).also { it.setPadding(0, dp(40), 0, 0) })
+        val box = panel(content).apply { gravity = Gravity.CENTER_HORIZONTAL; setPadding(dp(20), dp(36), dp(20), dp(30)) }
+        box.addView(CircularProgressIndicator(this).apply {
+            isIndeterminate = true; indicatorSize = dp(44); trackThickness = dp(5); trackCornerRadius = dp(3)
+            setIndicatorColor(accent); trackColor = c(R.color.accent_200); contentDescription = message
+        })
+        box.addView(text(message, 16, ink, true).apply { gravity = Gravity.CENTER; setPadding(0, dp(14), 0, 0); accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE })
+        box.addView(text("Mohon tunggu sebentar", 14, muted).apply { gravity = Gravity.CENTER; setPadding(0, dp(6), 0, 0) })
+        // Pulsing placeholders hint at the content that is about to appear.
+        listOf(0.7f, 0.45f).forEachIndexed { index, level ->
+            val card = View(this).apply { background = round(c(R.color.neutral_200), 32) }
+            content.addView(card, LinearLayout.LayoutParams(-1, dp(120)).apply { topMargin = dp(12) })
+            ObjectAnimator.ofFloat(card, View.ALPHA, level, level * 0.5f).apply {
+                duration = 800; startDelay = index * 150L; repeatMode = ValueAnimator.REVERSE; repeatCount = ValueAnimator.INFINITE
+                card.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                    override fun onViewAttachedToWindow(v: View) {}
+                    override fun onViewDetachedFromWindow(v: View) = cancel()
+                })
+                start()
+            }
+        }
     }
 
-    private fun content(): LinearLayout {
+    private fun content(pinnedForm: NativeForm? = null): LinearLayout {
         body.removeAllViews()
         val scroll = ScrollView(this).apply { isFillViewport = true; clipToPadding = false }
-        body.addView(scroll, FrameLayout.LayoutParams(-1, -1))
+        if (pinnedForm == null) body.addView(scroll, FrameLayout.LayoutParams(-1, -1))
+        else {
+            val layout = column()
+            body.addView(layout, FrameLayout.LayoutParams(-1, -1))
+            layout.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+            val composer = object : ScrollView(this) {
+                override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+                    super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec) / 2, MeasureSpec.AT_MOST))
+                }
+            }.apply {
+                tag = "discussion-composer"; elevation = dp(8).toFloat()
+                background = GradientDrawable().apply { setColor(c(R.color.neutral_100)); cornerRadii = FloatArray(8) { if (it < 4) dp(28).toFloat() else 0f } }
+            }
+            layout.addView(composer, LinearLayout.LayoutParams(-1, -2))
+            val form = column().apply { setPadding(dp(14), dp(12), dp(14), dp(10)) }
+            val frame = FrameLayout(this)
+            composer.addView(frame)
+            frame.addView(form, FrameLayout.LayoutParams(minOf(resources.displayMetrics.widthPixels - root.paddingLeft - root.paddingRight, dp(720)), -2, Gravity.CENTER_HORIZONTAL))
+            renderForm(form, pinnedForm)
+        }
         val frame = FrameLayout(this)
         scroll.addView(frame, FrameLayout.LayoutParams(-1, -2))
-        val content = column().apply { setPadding(dp(20), dp(20), dp(20), dp(28)) }
+        val content = column().apply { setPadding(dp(20), dp(8), dp(20), dp(28)) }
         val width = minOf(resources.displayMetrics.widthPixels - root.paddingLeft - root.paddingRight, dp(720))
         frame.addView(content, FrameLayout.LayoutParams(width, -2, Gravity.TOP or Gravity.CENTER_HORIZONTAL))
         return content
@@ -1014,48 +1139,101 @@ class MainActivity : AppCompatActivity() {
     private fun column() = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     private fun text(value: String, size: Int = 16, color: Int = ink, bold: Boolean = false) = TextView(this).apply {
         text = value; textSize = size.toFloat(); setTextColor(color)
-        if (bold) setTypeface(typeface, Typeface.BOLD)
+        typeface = if (bold) figtreeBold else figtree
         setLineSpacing(dp(3).toFloat(), 1f)
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
-    private fun heading(parent: LinearLayout, title: String, subtitle: String = "") {
-        parent.addView(text(title, 23, ink, true).apply { setPadding(0, dp(20), 0, dp(8)); ViewCompat.setAccessibilityHeading(this, true) })
+    private fun display(value: String, size: Int, color: Int = ink) = text(value, size, color).apply { typeface = caprasimo; setLineSpacing(0f, 1.1f) }
+    private fun c(color: Int) = getColor(color)
+    private fun round(color: Int, radius: Int) = GradientDrawable().apply { setColor(color); cornerRadius = dp(radius).toFloat() }
+    private fun oval(color: Int) = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(color) }
+    private fun ripple(view: View, radius: Int) {
+        view.foreground = RippleDrawable(ColorStateList.valueOf(c(R.color.neutral_300)), null, round(Color.BLACK, radius))
+        view.isClickable = true; view.isFocusable = true
+    }
+    private fun blobs(view: View, fill: Int, radius: Int, vararg circles: Blob) {
+        view.background = LayerDrawable(arrayOf<Drawable>(round(fill, radius)) + circles.map { oval(it.color) }).apply {
+            circles.forEachIndexed { index, blob ->
+                val layer = index + 1
+                setLayerSize(layer, dp(blob.size), dp(blob.size))
+                setLayerGravity(layer, Gravity.RIGHT or if (blob.fromBottom) Gravity.BOTTOM else Gravity.TOP)
+                setLayerInsetRight(layer, dp(blob.right))
+                if (blob.fromBottom) setLayerInsetBottom(layer, dp(blob.y)) else setLayerInsetTop(layer, dp(blob.y))
+            }
+        }
+        view.clipToOutline = true
+    }
+    private fun MaterialButton.paint(fill: Int, ink: Int, stroke: Int = 0) = apply {
+        backgroundTintList = enabledTint(fill, if (fill == Color.TRANSPARENT) fill else c(R.color.neutral_300))
+        setTextColor(enabledTint(ink, muted))
+        if (stroke != 0) { strokeColor = ColorStateList.valueOf(stroke); strokeWidth = dp(1) }
+    }
+    private fun chip(value: String, background: Int, color: Int) = text(value, 12, color, true).apply {
+        setPadding(dp(12), dp(4), dp(12), dp(4))
+        this.background = round(background, 100)
+        layoutParams = LinearLayout.LayoutParams(-2, -2)
+    }
+    // The first heading on a screen is its page title; later ones title a section.
+    private fun heading(parent: LinearLayout, title: String, subtitle: String = "", page: Boolean = parent.childCount == 0) {
+        parent.addView(display(title, if (page) 28 else 22).apply { setPadding(0, dp(if (page) 8 else 28), 0, dp(4)); ViewCompat.setAccessibilityHeading(this, true) })
         if (subtitle.isNotBlank()) parent.addView(text(subtitle, 14, muted))
     }
-    private fun panel(parent: LinearLayout, color: Int = Color.WHITE): LinearLayout {
+    private fun panel(parent: LinearLayout, color: Int = surface, radius: Int = 32): LinearLayout {
         val box = column().apply {
-            setPadding(dp(18), dp(18), dp(18), dp(18))
-            background = GradientDrawable().apply { setColor(color); cornerRadius = dp(12).toFloat() }
+            setPadding(dp(20), dp(20), dp(20), dp(20))
+            background = round(color, radius)
         }
-        parent.addView(box, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        parent.addView(box, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+        return box
+    }
+    private fun row(parent: LinearLayout, title: String, meta: String = "", fill: Int = surface, radius: Int = 100,
+                    icon: Int = 0, initial: String = "", leadFill: Int = canvas, leadInk: Int = ink,
+                    trail: Int = R.drawable.ic_chevron, trailInk: Int = ink, click: () -> Unit): LinearLayout {
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            minimumHeight = dp(if (meta.isBlank()) 60 else 64); setPadding(dp(12), dp(12), dp(16), dp(12))
+            background = round(fill, radius); setOnClickListener { click() }
+        }
+        ripple(box, radius)
+        val lead = if (initial.isNotBlank()) display(initial, 16, leadInk).apply { gravity = Gravity.CENTER }
+            else ImageView(this).apply { if (icon != 0) setImageResource(icon); imageTintList = ColorStateList.valueOf(leadInk); setPadding(dp(10), dp(10), dp(10), dp(10)) }
+        lead.background = oval(leadFill)
+        box.addView(lead, LinearLayout.LayoutParams(dp(38), dp(38)).apply { rightMargin = dp(14) })
+        val labels = column()
+        labels.addView(text(title, 15, ink).apply { typeface = figtreeSemi })
+        if (meta.isNotBlank()) labels.addView(text(meta, 13, muted).also { it.setPadding(0, dp(2), 0, 0) })
+        box.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
+        if (trail != 0) box.addView(ImageView(this).apply { setImageResource(trail); imageTintList = ColorStateList.valueOf(trailInk) }, LinearLayout.LayoutParams(dp(20), dp(20)))
+        parent.addView(box, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         return box
     }
     private fun empty(parent: LinearLayout, title: String, explanation: String) {
-        val box = panel(parent)
-        box.addView(text(title, 17, ink, true))
-        box.addView(text(explanation, 14, muted).also { it.setPadding(0, dp(6), 0, 0) })
+        val box = panel(parent, c(R.color.neutral_200)).apply { gravity = Gravity.CENTER_HORIZONTAL; setPadding(dp(20), dp(28), dp(20), dp(28)) }
+        box.addView(text(title, 16, ink, true).apply { gravity = Gravity.CENTER })
+        box.addView(text(explanation, 14, muted).also { it.gravity = Gravity.CENTER; it.setPadding(0, dp(6), 0, 0) })
     }
     private fun action(parent: LinearLayout, label: String, primary: Boolean = true, click: () -> Unit): MaterialButton {
-        val button = MaterialButton(this, null, if (primary) com.google.android.material.R.attr.materialButtonStyle else com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-            text = label; isAllCaps = false; textSize = 14f; minHeight = dp(52); minimumHeight = dp(52)
-            cornerRadius = dp(8); maxLines = 5
-            insetTop = dp(4); insetBottom = dp(4)
-            setPadding(dp(12), dp(8), dp(12), dp(8))
-            if (primary) { backgroundTintList = ColorStateList.valueOf(navy); setTextColor(Color.WHITE) }
-            else { setTextColor(navy); strokeColor = ColorStateList.valueOf(navy) }
+        val button = MaterialButton(this).apply {
+            text = label; isAllCaps = false; textSize = 16f; typeface = caprasimo; minHeight = dp(52); minimumHeight = dp(52)
+            cornerRadius = dp(100); maxLines = 5; elevation = 0f; stateListAnimator = null
+            insetTop = dp(2); insetBottom = dp(2)
+            setPadding(dp(18), dp(10), dp(18), dp(10))
+            // Secondary actions are tonal so the one accent button per screen stays the focal point.
+            paint(if (primary) accent else c(R.color.accent_100), if (primary) canvas else c(R.color.accent_800))
             setOnClickListener { click() }
         }
         parent.addView(button, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
         return button
     }
+    private fun enabledTint(color: Int, disabled: Int = c(R.color.neutral_300)) = ColorStateList(arrayOf(intArrayOf(-android.R.attr.state_enabled), intArrayOf()), intArrayOf(disabled, color))
     private fun input(parent: LinearLayout, label: String, type: Int): Pair<TextInputLayout, TextInputEditText> {
         val box = TextInputLayout(this).apply {
             hint = label; boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
-            boxBackgroundColor = Color.WHITE
-            boxStrokeColor = navy; defaultHintTextColor = ColorStateList.valueOf(muted)
-            setBoxCornerRadii(dp(8).toFloat(), dp(8).toFloat(), dp(8).toFloat(), dp(8).toFloat())
+            boxBackgroundColor = c(R.color.neutral_100)
+            boxStrokeColor = accent; defaultHintTextColor = ColorStateList.valueOf(muted)
+            setBoxCornerRadii(dp(24).toFloat(), dp(24).toFloat(), dp(24).toFloat(), dp(24).toFloat())
         }
-        val edit = TextInputEditText(box.context).apply { inputType = type; setTextColor(ink); textSize = 16f; minHeight = dp(56); isSingleLine = true }
+        val edit = TextInputEditText(box.context).apply { inputType = type; setTextColor(ink); textSize = 16f; typeface = figtree; minHeight = dp(56); isSingleLine = true }
         box.addView(edit, LinearLayout.LayoutParams(-1, -2))
         parent.addView(box, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
         return box to edit

@@ -1,0 +1,36 @@
+<!-- Synthetic/deidentified fixture using the observed BSI comment structure, 2026-10-30. -->
+<div class="main-container">
+  <div class="active-user-info">
+    <h5>Pertemuan 5</h5>
+    <div class="typing readmore1">Pancasila sebagai sistem filsafat</div>
+  </div>
+  <ul class="chat-box">
+    <li class="chat-left">
+      <div class="chat-avatar"><div class="chat-name">TEST_NIM_1</div></div>
+      <div class="chat-text"><div class="chat-name">Mahasiswa Uji A</div>
+        <p class="readmore">Terima kasih.</p><div class="chat-hour">2026-10-23 19:34:41<span class="icon-done_all"></span></div>
+      </div>
+    </li>
+    <li class="chat-right">
+      <div class="chat-avatar"><div class="chat-name">TEST_NIM_2</div></div>
+      <div class="chat-text"><div class="chat-name">Mahasiswa Uji B</div>
+        <p class="readmore">Terima kasih.</p><div class="chat-hour">2026-10-23 19:32:35</div>
+      </div>
+    </li>
+    <li class="chat-left">
+      <div class="chat-avatar"><div class="chat-name">TEST_NIP</div></div>
+      <div class="chat-text"><div class="chat-name">Dosen Uji</div>
+        <p class="readmore">Baris pertama.<br>Baris kedua &amp; penutup.</p><div class="chat-hour">2026-10-23 19:01:14</div>
+      </div>
+    </li>
+  </ul>
+  <form action="/send-komentarmhs" method="POST">
+    <input type="hidden" name="_token" value="TEST_CSRF">
+    <div class="chat-form"><div class="form-group">
+      <textarea class="form-control" name="komentar" placeholder="Write your comment..."></textarea>
+      <input type="hidden" name="id_chat" value="TEST_MEETING_5">
+      <input type="hidden" name="id" value="TEST_OPAQUE_ID">
+      <button class="btn btn-primary"><i class="icon-send"></i></button>
+    </div></div>
+  </form>
+</div>

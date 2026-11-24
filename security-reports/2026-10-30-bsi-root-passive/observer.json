@@ -1,0 +1,49 @@
+{
+  "findings": [
+    {
+      "title": "Missing X-Content-Type-Options",
+      "severity": "Low",
+      "confidence": "unconfirmed",
+      "location": "https://elearning.bsi.ac.id/",
+      "evidence": "Header absent on one response; applicability needs review.",
+      "mitigation": "Set X-Content-Type-Options: nosniff."
+    },
+    {
+      "title": "Missing Strict-Transport-Security",
+      "severity": "Low",
+      "confidence": "unconfirmed",
+      "location": "https://elearning.bsi.ac.id/",
+      "evidence": "Header absent on one response; applicability needs review.",
+      "mitigation": "Set HSTS after verifying HTTPS readiness."
+    },
+    {
+      "title": "Missing Content-Security-Policy",
+      "severity": "Low",
+      "confidence": "unconfirmed",
+      "location": "https://students.bsi.ac.id/",
+      "evidence": "Header absent on one response; applicability needs review.",
+      "mitigation": "Design a Content-Security-Policy for this document."
+    },
+    {
+      "title": "Missing Strict-Transport-Security",
+      "severity": "Low",
+      "confidence": "unconfirmed",
+      "location": "https://students.bsi.ac.id/",
+      "evidence": "Header absent on one response; applicability needs review.",
+      "mitigation": "Set HSTS after verifying HTTPS readiness."
+    }
+  ],
+  "observations": [
+    {
+      "url": "https://elearning.bsi.ac.id/",
+      "status": 200
+    },
+    {
+      "url": "https://students.bsi.ac.id/",
+      "status": 200
+    }
+  ],
+  "limitations": [
+    "GET header observation only; no injection, authorization, dependency, or TLS configuration assessment."
+  ]
+}

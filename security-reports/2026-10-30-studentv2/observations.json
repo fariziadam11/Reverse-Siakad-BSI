@@ -1,0 +1,130 @@
+{
+  "shared_requests_used": 6,
+  "observations": [
+    {
+      "url": "https://students.bsi.ac.id/login",
+      "method": "GET",
+      "status": 200,
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true,
+      "login_form_present": true,
+      "authenticated_profile_markers": false,
+      "redirect_destination_without_query": "",
+      "scripts_without_query": [
+        "https://cdn.jsdelivr.net/npm/sweetalert2@11",
+        "https://students.bsi.ac.id/assets/js/authentication-main.js",
+        "https://students.bsi.ac.id/assets/js/show-password.js",
+        "https://students.bsi.ac.id/assets/libs/bootstrap/js/bootstrap.bundle.min.js"
+      ],
+      "response_body_retained": false
+    },
+    {
+      "url": "https://students.bsi.ac.id/login",
+      "method": "POST",
+      "status": 302,
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true,
+      "login_form_present": false,
+      "authenticated_profile_markers": false,
+      "redirect_destination_without_query": "https://students.bsi.ac.id/dashboard",
+      "scripts_without_query": [],
+      "response_body_retained": false
+    },
+    {
+      "url": "https://students.bsi.ac.id/mahasiswa/beranda",
+      "method": "GET",
+      "status": 200,
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true,
+      "login_form_present": false,
+      "authenticated_profile_markers": true,
+      "redirect_destination_without_query": "",
+      "scripts_without_query": [
+        "https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js",
+        "https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js",
+        "https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js",
+        "https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js",
+        "https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js",
+        "https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js",
+        "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js",
+        "https://cdn.jsdelivr.net/npm/sweetalert2@11",
+        "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js",
+        "https://code.jquery.com/jquery-3.6.1.min.js",
+        "https://students.bsi.ac.id/assets/js/choices.js",
+        "https://students.bsi.ac.id/assets/js/custom-switcher.min.js",
+        "https://students.bsi.ac.id/assets/js/custom.js",
+        "https://students.bsi.ac.id/assets/js/datatables.js",
+        "https://students.bsi.ac.id/assets/js/defaultmenu.min.js",
+        "https://students.bsi.ac.id/assets/js/main.js",
+        "https://students.bsi.ac.id/assets/js/prism-custom.js",
+        "https://students.bsi.ac.id/assets/js/select2.js",
+        "https://students.bsi.ac.id/assets/js/simplebar.js",
+        "https://students.bsi.ac.id/assets/js/sticky.js",
+        "https://students.bsi.ac.id/assets/libs/@popperjs/core/umd/popper.min.js",
+        "https://students.bsi.ac.id/assets/libs/@simonwep/pickr/pickr.es5.min.js",
+        "https://students.bsi.ac.id/assets/libs/bootstrap/js/bootstrap.bundle.min.js",
+        "https://students.bsi.ac.id/assets/libs/choices.js/public/assets/scripts/choices.min.js",
+        "https://students.bsi.ac.id/assets/libs/node-waves/waves.min.js",
+        "https://students.bsi.ac.id/assets/libs/prismjs/prism.js",
+        "https://students.bsi.ac.id/assets/libs/simplebar/simplebar.min.js"
+      ],
+      "response_body_retained": false
+    }
+  ]
+}

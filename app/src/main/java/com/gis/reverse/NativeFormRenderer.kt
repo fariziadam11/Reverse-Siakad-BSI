@@ -2,8 +2,6 @@ package com.gis.reverse
 
 import android.app.Activity
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.Typeface
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.text.Editable
@@ -13,6 +11,7 @@ import android.text.TextWatcher
 import android.util.Patterns
 import android.view.View
 import android.widget.*
+import androidx.core.content.res.ResourcesCompat
 import com.gis.reverse.data.NativeField
 import com.gis.reverse.data.NativeForm
 import com.google.android.material.button.MaterialButton
@@ -27,24 +26,29 @@ class NativeFormRenderer(
     private val pickFile: (NativeForm, NativeField) -> Unit,
     private val submit: (NativeForm, List<Pair<String, String>>, Map<String, Uri>) -> Unit
 ) {
-    private val navy = Color.rgb(30, 58, 138)
-    private val ink = Color.rgb(15, 23, 42)
-    private val muted = Color.rgb(71, 85, 105)
-    private val errorColor = Color.rgb(153, 27, 27)
+    private val accent = activity.getColor(R.color.accent)
+    private val ink = activity.getColor(R.color.text)
+    private val muted = activity.getColor(R.color.neutral_700)
+    private val errorColor = activity.getColor(R.color.accent_700)
+    private val regular = ResourcesCompat.getFont(activity, R.font.figtree_regular)
     private data class Binding(val values: () -> List<String>, val validate: () -> Boolean)
 
     fun render(parent: LinearLayout, form: NativeForm) {
+        val comment = Uri.parse(form.action).path == "/send-komentarmhs"
         if (form.download) {
             button(parent, form.submitLabel) { if (!form.disabled) submit(form, form.hidden, emptyMap()) }.isEnabled = !form.disabled
             return
         }
         val wrapper = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-        parent.addView(wrapper, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
-        val body = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+        parent.addView(wrapper, LinearLayout.LayoutParams(-1, -2).apply { topMargin = if (comment) 0 else dp(16) })
+        val body = LinearLayout(activity).apply {
+            orientation = if (comment) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+            if (comment) gravity = android.view.Gravity.BOTTOM
+        }
         if (form.collapsed || form.title == "Ubah password") {
             button(wrapper, form.title) { body.visibility = if (body.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
             body.visibility = View.GONE
-        } else label(wrapper, form.title, 20)
+        } else if (!comment) label(wrapper, form.title, 20)
         wrapper.addView(body)
         val draft = state.draft(form.key)
         val bindings = mutableMapOf<String, Binding>()
@@ -98,7 +102,7 @@ class NativeFormRenderer(
                         field.options.forEach { option ->
                             val choice = MaterialRadioButton(activity).apply {
                                 id = View.generateViewId(); text = option.label; tag = option.value
-                                setTextColor(ink); minHeight = dp(48); isEnabled = !field.readOnly && !option.disabled
+                                setTextColor(ink); typeface = regular; minHeight = dp(48); isEnabled = !field.readOnly && !option.disabled
                             }
                             group.addView(choice)
                             if (option.value in selected) group.check(choice.id)
@@ -123,7 +127,7 @@ class NativeFormRenderer(
                                     label(choices, "${minOf(40, filtered.size)} dari ${filtered.size} pilihan. Persempit pencarian untuk pilihan lainnya.", 13, muted)
                                     filtered.take(40).forEach { option ->
                                         choices.addView(MaterialCheckBox(activity).apply {
-                                            text = option.label; setTextColor(ink); minHeight = dp(48)
+                                            text = option.label; setTextColor(ink); typeface = regular; minHeight = dp(48)
                                             isChecked = option.value in selected; isEnabled = !option.disabled && !field.readOnly
                                             setOnCheckedChangeListener { _, checked ->
                                                 if (checked) selected.add(option.value) else selected.remove(option.value)
@@ -146,7 +150,7 @@ class NativeFormRenderer(
                         val choices = field.options.map { option ->
                             MaterialCheckBox(activity).apply {
                                 text = option.label; tag = option.value; isChecked = option.value in selected
-                                setTextColor(ink); minHeight = dp(48); isEnabled = !field.readOnly && !option.disabled
+                                setTextColor(ink); typeface = regular; minHeight = dp(48); isEnabled = !field.readOnly && !option.disabled
                                 body.addView(this)
                             }
                         }
@@ -184,14 +188,14 @@ class NativeFormRenderer(
                 }
                 else -> {
                     val fullLabel = (if (field.name == "password_confirmation") "Konfirmasi password" else field.label) + if (field.required) " *" else ""
-                    val largeText = activity.resources.configuration.fontScale >= 1.5f
+                    val largeText = activity.resources.configuration.fontScale >= 1.5f && !comment
                     if (largeText) fieldLabels[field.name] = label(body, fullLabel, 15)
                     val box = TextInputLayout(activity).apply {
                         hint = fullLabel
                         isExpandedHintEnabled = false
-                        boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE; boxBackgroundColor = Color.WHITE
-                        boxStrokeColor = navy; defaultHintTextColor = ColorStateList.valueOf(muted)
-                        setBoxCornerRadii(dp(8).toFloat(), dp(8).toFloat(), dp(8).toFloat(), dp(8).toFloat())
+                        boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE; boxBackgroundColor = activity.getColor(if (comment) R.color.bg else R.color.neutral_100)
+                        boxStrokeColor = accent; defaultHintTextColor = ColorStateList.valueOf(muted)
+                        setBoxCornerRadii(dp(24).toFloat(), dp(24).toFloat(), dp(24).toFloat(), dp(24).toFloat())
                     }
                     val edit = TextInputEditText(box.context).apply {
                         inputType = when (field.type) {
@@ -204,8 +208,12 @@ class NativeFormRenderer(
                             else -> InputType.TYPE_CLASS_TEXT
                         }
                         isSingleLine = field.type != "textarea"
-                        if (field.type == "textarea") { minLines = 4; gravity = android.view.Gravity.TOP }
-                        minHeight = dp(56); textSize = 16f; setTextColor(ink)
+                        if (field.type == "textarea") {
+                            minLines = if (comment) 1 else 4
+                            if (comment) maxLines = 3
+                            gravity = android.view.Gravity.TOP
+                        }
+                        minHeight = dp(56); textSize = 16f; setTextColor(ink); typeface = regular
                         setText(if (field.type == "password") "" else saved?.firstOrNull() ?: field.value)
                         isSaveEnabled = false
                         if (largeText) contentDescription = fullLabel
@@ -238,7 +246,7 @@ class NativeFormRenderer(
                     if (largeText) { box.isHintEnabled = false; edit.hint = null }
                     textFields[field.name] = edit
                     textLayouts[field.name] = box
-                    body.addView(box, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+                    body.addView(box, LinearLayout.LayoutParams(if (comment) 0 else -1, -2, if (comment) 1f else 0f).apply { topMargin = if (comment) 0 else dp(14) })
                     if (field.help.isNotBlank()) box.helperText = field.help
                     val read = { listOf(edit.text.toString()) }
                     if (field.type != "password") edit.addTextChangedListener(object : TextWatcher {
@@ -302,7 +310,13 @@ class NativeFormRenderer(
                 val values = form.hidden + editable + if (form.submitName.isNotBlank()) listOf(form.submitName to form.submitValue) else emptyList()
                 submit(form, values, draft.files.toMap())
             }
-        }.isEnabled = !form.disabled
+        }.apply {
+            isEnabled = !form.disabled
+            if (comment) {
+                text = "Kirim"; contentDescription = form.submitLabel
+                layoutParams = LinearLayout.LayoutParams(-2, dp(56)).apply { leftMargin = dp(8) }
+            }
+        }
     }
 
     private fun validUrl(value: String): Boolean = try { val uri = Uri.parse(value.trim()); uri.scheme in listOf("http", "https") && !uri.host.isNullOrBlank() && !value.contains(Regex("\\s")) } catch (_: Exception) { false }
@@ -310,12 +324,13 @@ class NativeFormRenderer(
     private fun sizeOf(uri: Uri): Long? = try { activity.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { if (it.moveToFirst() && !it.isNull(0)) it.getLong(0) else null } } catch (_: Exception) { null }
     private fun label(parent: LinearLayout, value: String, size: Int, color: Int = ink): TextView = TextView(activity).apply {
         text = value; textSize = size.toFloat(); setTextColor(color); setLineSpacing(dp(3).toFloat(), 1f)
-        if (size >= 15) setTypeface(typeface, Typeface.BOLD)
+        typeface = ResourcesCompat.getFont(activity, when { size >= 20 -> R.font.caprasimo; size >= 15 -> R.font.figtree_bold; else -> R.font.figtree_regular })
         setPadding(0, dp(8), 0, dp(4)); parent.addView(this)
     }
     private fun button(parent: LinearLayout, title: String, action: () -> Unit): MaterialButton = MaterialButton(activity).apply {
-        text = title; isAllCaps = false; maxLines = 5; minHeight = dp(52); cornerRadius = dp(8)
-        backgroundTintList = ColorStateList.valueOf(navy); setTextColor(Color.WHITE)
+        text = title; isAllCaps = false; maxLines = 5; minHeight = dp(52); cornerRadius = dp(100)
+        textSize = 16f; typeface = ResourcesCompat.getFont(activity, R.font.caprasimo)
+        backgroundTintList = ColorStateList.valueOf(accent); setTextColor(activity.getColor(R.color.bg))
         setOnClickListener { action() }
         parent.addView(this, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
     }

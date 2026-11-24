@@ -20,7 +20,7 @@ function multipart(req, raw) {
   });
 }
 async function handle(req, res) {
-  const url = new URL(req.url, 'http://localhost'); const path = url.pathname;
+  const url = new URL(req.url, 'http://localhost'); const path = url.pathname.replace(/^\/student(?=\/|$)/, '') || '/';
   let sid = /(?:^|;\s*)student_test_session=([^;]+)/.exec(req.headers.cookie || '')?.[1];
   if (!sid || !sessions.has(sid)) { sid = crypto.randomBytes(12).toString('hex'); sessions.set(sid,{authenticated:false,writes:0}); res.setHeader('Set-Cookie',`student_test_session=${sid}; Path=/; HttpOnly; SameSite=Lax`); }
   const session = sessions.get(sid);
@@ -48,6 +48,7 @@ async function handle(req, res) {
   if (path === '/mahasiswa/myLMS') return reply(res,302,'',{Location:session.badSso ? 'https://example.invalid/authenticate-student?token=synthetic-sso' : 'https://elearning.bsi.ac.id/authenticate-student?token=synthetic-sso'});
   if (path === '/__bad-sso') {session.badSso=true;return reply(res,200,home);}
   if (path === '/mahasiswa/beranda') return reply(res,200,home);
+  if (path === '/__changed/mahasiswa/krs') return reply(res,200,shell('<h5>Kartu Rencana Studi</h5><div class="new-krs-layout">Synthetic incompatible KRS</div>'));
   if (path === '/mahasiswa/krs') return reply(res,200,shell('<h5>Kartu Rencana Studi</h5><table><thead><tr><th>Kode</th><th>Mata Kuliah</th><th>SKS</th></tr></thead><tbody><tr><td>TEST</td><td>MATA KULIAH UJI</td><td>3</td></tr></tbody></table>'));
   if (path === '/mahasiswa/khs-semester') return reply(res,200,semester(url.searchParams.get('semester')));
   if (path === '/__stats') return reply(res,200,shell(`<pre id="received">${esc(JSON.stringify({writes:session.writes,last:session.last}))}</pre>`));

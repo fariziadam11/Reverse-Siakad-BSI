@@ -51,6 +51,12 @@ class StudentPortalClientSimulationTest {
         assertNotEquals(before, cookies.get(origin))
         assertTrue(client.page("/mahasiswa/krs").text().contains("MATA KULIAH UJI"))
     }
+    @Test fun bothStudentReadMethodsRejectChangedKrsWithoutDiscardingTheSession() {
+        login()
+        assertThrows(PortalError::class.java) { client.read("/__changed/mahasiswa/krs") }
+        assertThrows(PortalError::class.java) { client.page("/__changed/mahasiswa/krs") }
+        assertTrue(StudentPortalParser.page(client.page("/mahasiswa/krs")).tables.single().rows.isNotEmpty())
+    }
 
     @Test fun invalidLoginAndA200LoginPageAreRecognizedWithoutElearningCaptchaFields() {
         val challenge = client.challenge()

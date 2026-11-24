@@ -1,0 +1,65 @@
+{
+  "findings": [
+    {
+      "title": "Header X-Content-Type-Options tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://elearning.bsi.ac.id/",
+      "evidence": "Respons tidak menyertakan X-Content-Type-Options. Ketiadaan header saja tidak membuktikan MIME sniffing yang dapat dieksploitasi. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Potensi berkurangnya perlindungan MIME sniffing; dampak bergantung pada tipe konten dan cara browser memakainya.",
+      "mitigation": "Tambahkan X-Content-Type-Options: nosniff dan pastikan Content-Type sesuai pada setiap respons.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header HSTS tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://elearning.bsi.ac.id/",
+      "evidence": "Respons HTTPS tidak menyertakan Strict-Transport-Security. Status preload dan kebijakan subdomain tidak diperiksa; serangan downgrade tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Perlindungan browser untuk kunjungan berikutnya tidak dapat dibuktikan dari respons ini; downgrade atau kebocoran kredensial tidak terbukti.",
+      "mitigation": "Terapkan Strict-Transport-Security setelah memastikan seluruh layanan terkait siap HTTPS. Evaluasi includeSubDomains dan preload sebelum mengaktifkannya.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header Content-Security-Policy tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://students.bsi.ac.id/",
+      "evidence": "Respons dokumen HTML tidak menyertakan header Content-Security-Policy. CSP melalui meta tag tidak diperiksa karena body tidak disimpan; XSS tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Lapisan mitigasi injeksi konten melalui header tidak terlihat. Ini bukan bukti adanya XSS.",
+      "mitigation": "Tinjau CSP yang mungkin tersedia melalui meta tag dan terapkan kebijakan header sesuai sumber konten aplikasi; evaluasi terlebih dahulu dengan Report-Only.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header HSTS tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://students.bsi.ac.id/",
+      "evidence": "Respons HTTPS tidak menyertakan Strict-Transport-Security. Status preload dan kebijakan subdomain tidak diperiksa; serangan downgrade tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Perlindungan browser untuk kunjungan berikutnya tidak dapat dibuktikan dari respons ini; downgrade atau kebocoran kredensial tidak terbukti.",
+      "mitigation": "Terapkan Strict-Transport-Security setelah memastikan seluruh layanan terkait siap HTTPS. Evaluasi includeSubDomains dan preload sebelum mengaktifkannya.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    }
+  ],
+  "limitations": [
+    "Scope: GET https://elearning.bsi.ac.id/ dan GET https://students.bsi.ac.id/; lingkungan produksi; izin pengguna dicatat di scope.json. Maksimal dua request total, 1 request/detik, concurrency 1, timeout 10 detik, tanpa retry. Izin berlaku 15 menit sejak 2026-10-30T08:11:07.4836088Z.",
+    "Pelaksanaan: masing-masing endpoint mengembalikan HTTP 200. Dua GET selesai, tanpa login, redirect, payload, atau perubahan data. Kredensial tidak digunakan dan tidak disimpan dalam artefak assessment ini.",
+    "Keempat temuan adalah indikasi hardening berisiko rendah. Ketiadaan header teramati pada respons saat itu; tidak membuktikan kerentanan yang dapat dieksploitasi. Tidak ada kerentanan terkonfirmasi dan tidak ada false positive yang telah dibuktikan.",
+    "SQL Injection, XSS, IDOR, broken access control, autentikasi, sesi login, cookie setelah login, dan keamanan REST API internal belum dinilai. Tidak tersedia source server atau trafik autentikasi dalam scope ini.",
+    "Analisis hanya berlaku untuk dua URL tersebut; hubungan students.bsi.ac.id dengan aplikasi bernama studentv2 dan endpoint lainnya belum diverifikasi.",
+    "Tidak menjalankan ZAP, Nuclei, atau Semgrep pada tahap ini: observer terbatas sudah menggunakan seluruh budget dua request. Tidak ada scan aktif, crawl, login, atau audit OWASP Top 10 secara menyeluruh.",
+    "Laporan lama di direktori lain tidak dijadikan bukti baru atau izin tambahan. Hasil ini adalah snapshot, bukan pernyataan bahwa kedua website aman."
+  ]
+}

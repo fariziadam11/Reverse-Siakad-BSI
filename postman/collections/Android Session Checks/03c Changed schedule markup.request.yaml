@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{baseUrl}}/__changed/sch'
+method: GET
+order: 3300
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('A simulated incompatible page can still return HTTP 200', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('new-schedule-layout');
+        pm.expect(pm.response.text()).not.to.include('jadwal-card');
+      });

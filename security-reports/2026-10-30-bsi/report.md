@@ -1,0 +1,78 @@
+# Security assessment
+
+Findings: 5
+
+## Coverage and limitations
+
+- Scanner matches are unconfirmed unless independently validated.
+- Raw HTTP bodies, secrets, and scanner snippets are omitted. Manual secret review is required.
+- Penilaian awal 30 Oktober 2026: tepat dua GET HTTPS ke /login pada elearning.bsi.ac.id dan students.bsi.ac.id; keduanya HTTP 200. Batas request telah habis. Tidak mengikuti redirect.
+- Source lokal ditinjau secara terbatas: BsiClient, StudentPortalClient, SecureSession, parser login, pemanggil terkait pada MainActivity, manifest, aturan backup, dan test sesi terkait. Source ini adalah klien Android; implementasi backend BSI tidak tersedia.
+- Login, CAPTCHA, halaman terautentikasi, IDOR, CSRF backend, SQLi/XSS, brute force, mutasi data, pemindaian dependency, dan konfigurasi TLS lengkap tidak diuji. Kredensial pengguna tidak digunakan atau disimpan.
+- Juice Shop tidak diakses: lab lokal terpisah dan tidak membuktikan kondisi portal BSI. ZAP, Nuclei, SQLMap, dan Semgrep tidak menjalankan scan; observer bawaan dipilih untuk membatasi trafik secara pasti.
+- Python 3.14.7, Nuclei 3.11.1, dan SQLMap 1.10.10.29\#dev diperiksa melalui versi lokal. Versi runtime ZAP/Semgrep tidak diperiksa ulang. Tidak ada pembaruan tool.
+- codebase-memory list\_projects dan check\_index\_coverage gagal dengan Transport closed; pembacaan source langsung dipakai. Test Android dan simulasi tidak dijalankan.
+- Kontrol terlihat pada source: pemeriksaan same-origin sebelum forwarding cookie, penolakan cleartext pada manifest, AES-GCM dengan Android Keystore, serta pengecualian backup. Efektivitas runtime tidak dibuktikan oleh review ini.
+- Catatan yang tidak dihitung sebagai celah: request\(\) mempertahankan POST pada 307/308 dalam origin yang sama, sesuai semantik redirect; submit\(\) menolak replay POST. Tanpa perilaku server dan dampak terukur, perbedaan ini bukan bukti kerentanan.
+- Keparahan dipisahkan dari keyakinan: empat ketiadaan header teramati secara langsung, dampak eksploitasi belum terbukti. Kandidat cookie tetap belum terkonfirmasi. CVSS tidak dihitung karena metrik dampak tidak tersedia.
+- Tidak mengubah kode aplikasi, perubahan pengguna yang sudah ada, maupun data portal. Laporan tidak menyertakan raw body, cookie, kredensial, token, atau data pribadi.
+
+## Header tidak tersedia: X-Content-Type-Options
+
+- Severity: Low
+- Confidence: confirmed \(ketiadaan header saja; eksploitasi tidak diuji\)
+- Source: curated/observer
+- Location: https://elearning.bsi.ac.id/login
+- Evidence: Header X-Content-Type-Options tidak ditemukan pada satu respons GET halaman login berstatus HTTP 200; redirect tidak diikuti.
+- Impact: Respons tidak memerintahkan browser memakai nosniff. Eksploitasi memerlukan kondisi MIME atau konten yang relevan; kondisi tersebut tidak diperiksa.
+- Reproduction: Dalam cakupan izin baru, kirim satu GET tanpa redirect ke lokasi temuan lalu periksa header respons. Tidak perlu autentikasi.
+- Mitigation: Tambahkan X-Content-Type-Options: nosniff dan Content-Type yang benar pada respons terkait.
+- Retest: Periksa respons login dan respons error setelah konfigurasi diperbaiki; pastikan alur login tetap bekerja.
+
+## Header tidak tersedia: Strict-Transport-Security
+
+- Severity: Low
+- Confidence: confirmed \(ketiadaan header saja; eksploitasi tidak diuji\)
+- Source: curated/observer
+- Location: https://elearning.bsi.ac.id/login
+- Evidence: Header Strict-Transport-Security tidak ditemukan pada satu respons GET halaman login berstatus HTTP 200; redirect tidak diikuti.
+- Impact: Browser belum menerima kebijakan HSTS dari respons ini. Risiko downgrade bergantung pada kunjungan HTTP, preload, dan kebijakan domain induk; ketiganya tidak diperiksa. Aplikasi Android sendiri melarang cleartext.
+- Reproduction: Dalam cakupan izin baru, kirim satu GET tanpa redirect ke lokasi temuan lalu periksa header respons. Tidak perlu autentikasi.
+- Mitigation: Set Strict-Transport-Security sesudah memastikan kesiapan HTTPS. Tinjau subdomain sebelum mengaktifkan includeSubDomains atau preload.
+- Retest: Periksa respons login dan respons error setelah konfigurasi diperbaiki; pastikan alur login tetap bekerja.
+
+## Header tidak tersedia: Content-Security-Policy
+
+- Severity: Low
+- Confidence: confirmed \(ketiadaan header saja; eksploitasi tidak diuji\)
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/login
+- Evidence: Header Content-Security-Policy tidak ditemukan pada satu respons GET halaman login berstatus HTTP 200; redirect tidak diikuti.
+- Impact: Respons tidak menyatakan pembatasan sumber konten melalui header CSP. CSP meta dan kontrol lain tidak diperiksa; ini bukan bukti XSS.
+- Reproduction: Dalam cakupan izin baru, kirim satu GET tanpa redirect ke lokasi temuan lalu periksa header respons. Tidak perlu autentikasi.
+- Mitigation: Susun CSP sesuai sumber daya login; uji dengan Report-Only sebelum enforcement dan pertahankan escaping output.
+- Retest: Periksa respons login dan respons error setelah konfigurasi diperbaiki; pastikan alur login tetap bekerja.
+
+## Header tidak tersedia: Strict-Transport-Security
+
+- Severity: Low
+- Confidence: confirmed \(ketiadaan header saja; eksploitasi tidak diuji\)
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/login
+- Evidence: Header Strict-Transport-Security tidak ditemukan pada satu respons GET halaman login berstatus HTTP 200; redirect tidak diikuti.
+- Impact: Browser belum menerima kebijakan HSTS dari respons ini. Risiko downgrade bergantung pada kunjungan HTTP, preload, dan kebijakan domain induk; ketiganya tidak diperiksa. Aplikasi Android sendiri melarang cleartext.
+- Reproduction: Dalam cakupan izin baru, kirim satu GET tanpa redirect ke lokasi temuan lalu periksa header respons. Tidak perlu autentikasi.
+- Mitigation: Set Strict-Transport-Security sesudah memastikan kesiapan HTTPS. Tinjau subdomain sebelum mengaktifkan includeSubDomains atau preload.
+- Retest: Periksa respons login dan respons error setelah konfigurasi diperbaiki; pastikan alur login tetap bekerja.
+
+## Pembersihan cookie lokal hanya mencakup nama yang terlihat pada path root
+
+- Severity: Low
+- Confidence: unconfirmed \(analisis source; belum direproduksi di Android\)
+- Source: curated/observer
+- Location: SecureSession.kt, baris 56-58; direktori app / src / main / java / com / gis / reverse / data
+- Evidence: clear\(\) mengambil cookie dengan getCookie\(origin\), kemudian menghapus tiap nama dengan Max-Age=0 dan Path=/. Metadata path dan domain asli tidak tersedia dari pemanggilan ini. Test SessionCookieIsolationTest hanya memakai cookie host-only Path=/ pada dua host berbeda.
+- Impact: Jika server memakai cookie berpath khusus atau scope domain berbeda, cookie tersebut berpotensi tersisa setelah pembersihan lokal. Belum diketahui apakah portal memakai cookie seperti itu atau sesi masih valid setelah logout server; takeover tidak terbukti.
+- Reproduction: Pada pengujian Android terisolasi dengan akun sintetis, pasang cookie Path=/mahasiswa dan varian Domain induk. Jalankan clear\(\) untuk satu portal, lalu periksa cookie pada path asal dan pastikan portal lain tidak ikut dibersihkan. Langkah ini belum dijalankan.
+- Mitigation: Verifikasi scope cookie aktual terlebih dahulu. Jika diperlukan, lacak metadata Set-Cookie dan hapus pada domain/path asal; jangan menghapus seluruh CookieManager bersama karena portal lain harus tetap terisolasi.
+- Retest: Tambahkan kasus cookie path khusus dan domain induk ke SessionCookieIsolationTest, lalu verifikasi logout server dengan akun uji yang disetujui.

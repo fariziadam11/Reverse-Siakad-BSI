@@ -2,11 +2,11 @@ package com.gis.reverse
 
 import android.app.Activity
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.Uri
 import android.text.InputType
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import com.gis.reverse.data.*
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -22,7 +22,7 @@ class StudentResearchFormRenderer(
     private val submit: (NativeForm, List<Pair<String, String>>, Map<String, Uri>) -> Unit
 ) {
     private val memberNames = listOf("nim[]", "nama[]", "prodi[]", "hp[]", "jenjang[]")
-    private val navy = Color.rgb(30, 58, 138)
+    private val accent = activity.getColor(R.color.accent)
 
     fun render(parent: LinearLayout, original: NativeForm) {
         val wrapper = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
@@ -32,8 +32,9 @@ class StudentResearchFormRenderer(
         fun key(member: String, name: String) = "member:$member|$name"
         fun button(title: String, action: () -> Unit) {
             wrapper.addView(MaterialButton(activity).apply {
-                text = title; isAllCaps = false; maxLines = 4; minHeight = dp(52)
-                setTextColor(Color.WHITE); backgroundTintList = ColorStateList.valueOf(navy)
+                text = title; isAllCaps = false; maxLines = 4; minHeight = dp(52); cornerRadius = dp(100)
+                textSize = 16f; typeface = ResourcesCompat.getFont(activity, R.font.caprasimo)
+                setTextColor(activity.getColor(R.color.bg)); backgroundTintList = ColorStateList.valueOf(accent)
                 setOnClickListener { action() }
             }, LinearLayout.LayoutParams(-1, -2))
         }
@@ -41,7 +42,7 @@ class StudentResearchFormRenderer(
             wrapper.removeAllViews()
             wrapper.addView(TextView(activity).apply {
                 text = "Anggota pertama berasal dari akun Anda. Tambahkan anggota melalui pencarian NIM sebelum mengirim surat."
-                textSize = 14f; setTextColor(Color.rgb(71, 85, 105)); setPadding(0, dp(12), 0, dp(12))
+                textSize = 14f; setTextColor(activity.getColor(R.color.neutral_700)); typeface = ResourcesCompat.getFont(activity, R.font.figtree_regular); setPadding(0, dp(12), 0, dp(12))
             })
             button("Tambah anggota surat") {
                 val box = TextInputLayout(activity).apply { hint = "NIM anggota"; setPadding(dp(20), dp(12), dp(20), 0) }

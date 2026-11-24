@@ -17,8 +17,12 @@ data class NativeForm(
     val notes: List<String> = emptyList()
 )
 data class NativeNotice(val text: String, val error: Boolean)
+data class DiscussionComment(val name: String, val identifier: String, val message: String, val time: String)
+data class DiscussionTopic(val title: String, val description: String, val author: String, val time: String,
+    val links: List<PortalLink>, val forms: List<NativeForm>)
 data class NativePage(
     val facts: List<Pair<String, String>>, val paragraphs: List<String>, val statuses: List<String>,
     val notices: List<NativeNotice>, val forms: List<NativeForm>, val links: List<PortalLink>,
-    val tables: List<PortalTable>
+    val tables: List<PortalTable>, val comments: List<DiscussionComment> = emptyList(),
+    val topics: List<DiscussionTopic> = emptyList()
 )

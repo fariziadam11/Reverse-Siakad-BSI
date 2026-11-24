@@ -1,17 +1,73 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Reverse" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">#1E3A8A</item>
-        <item name="colorPrimaryVariant">#172554</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">#5B21B6</item>
-        <item name="colorOnSecondary">@color/white</item>
+    <!-- Light only: Organic is a warm cream ground; MainActivity paints its own surfaces. -->
+    <style name="Theme.Reverse" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/bg</item>
+        <item name="colorPrimaryContainer">@color/accent_200</item>
+        <item name="colorOnPrimaryContainer">@color/accent_800</item>
+        <item name="colorSecondary">@color/accent_2_700</item>
+        <item name="colorOnSecondary">@color/bg</item>
+        <item name="colorSecondaryContainer">@color/accent_2_100</item>
+        <item name="colorOnSecondaryContainer">@color/accent_2_800</item>
+        <item name="colorSurface">@color/neutral_100</item>
+        <item name="colorOnSurface">@color/text</item>
+        <item name="colorOnSurfaceVariant">@color/neutral_700</item>
+        <item name="colorSurfaceContainerHigh">@color/bg</item>
+        <item name="colorOutline">@color/neutral_300</item>
+        <item name="colorError">@color/accent_700</item>
+        <item name="android:colorBackground">@color/bg</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">#172554</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">#F5F7FB</item>
-        <!-- Customize your theme here. -->
+        <item name="android:navigationBarColor">@color/neutral_100</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:fontFamily">@font/figtree</item>
+        <item name="fontFamily">@font/figtree</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Reverse.Display</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Reverse.Button</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Reverse.NavLabel</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Reverse.Body</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Reverse.DialogBody</item>
+        <item name="popupMenuBackground">@drawable/bg_popup</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Reverse.Dialog</item>
+    </style>
+
+    <!-- Confirmation dialogs: ghost "Batal", filled accent confirm. -->
+    <style name="ThemeOverlay.Reverse.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material3.Button</item>
+    </style>
+
+    <style name="TextAppearance.Reverse.Display" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">@font/caprasimo</item>
+        <item name="fontFamily">@font/caprasimo</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+    <style name="TextAppearance.Reverse.Bar" parent="TextAppearance.Reverse.Display">
+        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+    <style name="TextAppearance.Reverse.BarSub" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/figtree</item>
+        <item name="fontFamily">@font/figtree</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/neutral_700</item>
+    </style>
+    <style name="TextAppearance.Reverse.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/caprasimo</item>
+        <item name="fontFamily">@font/caprasimo</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+    <style name="TextAppearance.Reverse.NavLabel" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:fontFamily">@font/figtree_bold</item>
+        <item name="fontFamily">@font/figtree_bold</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="TextAppearance.Reverse.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/figtree</item>
+        <item name="fontFamily">@font/figtree</item>
+    </style>
+    <style name="TextAppearance.Reverse.DialogBody" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/figtree</item>
+        <item name="fontFamily">@font/figtree</item>
+        <item name="android:textSize">15sp</item>
     </style>
 </resources>

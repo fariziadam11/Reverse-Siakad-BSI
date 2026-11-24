@@ -1,0 +1,72 @@
+[
+  {
+    "url": "https://elearning.bsi.ac.id/login",
+    "method": "GET",
+    "status": 200,
+    "login_form_present": true,
+    "redirect_present": false,
+    "redirect_in_scope": null,
+    "cache_control": "no-cache, private",
+    "framing_header_present": false,
+    "csp_header_present": true,
+    "cookie_attributes": [
+      {
+        "secure": false,
+        "httponly": false,
+        "samesite_present": true,
+        "path_present": true,
+        "domain_present": false
+      },
+      {
+        "secure": false,
+        "httponly": true,
+        "samesite_present": true,
+        "path_present": true,
+        "domain_present": false
+      }
+    ],
+    "form_action_allowed": true,
+    "input_fields": [
+      "_token",
+      "username",
+      "password",
+      "captcha_answer"
+    ],
+    "captcha_field_present": true
+  },
+  {
+    "url": "https://students.bsi.ac.id/login",
+    "method": "GET",
+    "status": 200,
+    "login_form_present": true,
+    "redirect_present": false,
+    "redirect_in_scope": null,
+    "cache_control": "no-cache, private",
+    "framing_header_present": false,
+    "csp_header_present": false,
+    "cookie_attributes": [
+      {
+        "secure": true,
+        "httponly": false,
+        "samesite_present": true,
+        "path_present": true,
+        "domain_present": false
+      },
+      {
+        "secure": true,
+        "httponly": true,
+        "samesite_present": true,
+        "path_present": true,
+        "domain_present": false
+      }
+    ],
+    "form_action_allowed": true,
+    "input_fields": [
+      "_token",
+      "username",
+      "password",
+      "remember"
+    ],
+    "captcha_field_present": false
+  }
+]

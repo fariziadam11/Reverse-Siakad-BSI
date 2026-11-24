@@ -10,6 +10,10 @@ info:
     from expired authentication with one read-only dashboard check. It retains
     an authenticated session and asks the user to refresh the form; it never
     replays a rejected write. Live 419 behavior remains unverified.
+    The client validates discussion list and comment structure on page reads;
+    missing containers or comment context produce a compatibility error.
+    Empty lists with intact containers remain valid. This is a client rule,
+    not an official server guarantee or a new HTTP response status.
 servers:
   - url: https://elearning.bsi.ac.id
 security:

@@ -7,6 +7,11 @@ info:
     Not an official BSI API. Native controls preserve server forms, hidden values,
     query parameters and opaque links. Account mutations were not submitted live.
     Session cookies are isolated from elearning.bsi.ac.id. Examples use synthetic data.
+    Read-only reinspection on 2026-10-30 returned text/html for home, KRS,
+    semester selection and lecturer listing even with Accept application/json.
+    Existing lecturer-detail, internship-information and member-lookup JSON
+    endpoints do not replace those HTML pages. The native client validates
+    known content containers and controls, preserving explicit server notices.
 servers:
   - url: https://students.bsi.ac.id
 paths:

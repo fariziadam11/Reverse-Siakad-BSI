@@ -1,0 +1,33 @@
+{
+  "timeout_seconds": 10,
+  "excluded_urls": [],
+  "max_requests": 8,
+  "authorization": "Pengguna memilih Izinkan pengambilan dan analisis delapan file tersebut pada percakapan.",
+  "allowed_urls": [
+    "https://students.bsi.ac.id/assets/js/authentication-main.js",
+    "https://students.bsi.ac.id/assets/js/show-password.js",
+    "https://students.bsi.ac.id/assets/js/main.js",
+    "https://students.bsi.ac.id/assets/js/custom.js",
+    "https://students.bsi.ac.id/assets/js/datatables.js",
+    "https://students.bsi.ac.id/assets/js/select2.js",
+    "https://students.bsi.ac.id/assets/js/choices.js",
+    "https://students.bsi.ac.id/assets/js/defaultmenu.min.js"
+  ],
+  "expires_utc": "2026-10-30T08:45:04.0014416Z",
+  "retries": 0,
+  "exclusions": [
+    "Login ulang",
+    "Redirect",
+    "CDN",
+    "Eksekusi JavaScript",
+    "Payload",
+    "Semua URL lain termasuk endpoint yang ditemukan"
+  ],
+  "concurrency": 1,
+  "created_utc": "2026-10-30T08:30:03.9991806Z",
+  "methods": [
+    "GET"
+  ],
+  "max_runtime_seconds": 120,
+  "requests_per_second": 1
+}

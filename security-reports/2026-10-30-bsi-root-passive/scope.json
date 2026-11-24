@@ -1,0 +1,23 @@
+{
+  "retries": 0,
+  "allowed_urls": [
+    "https://elearning.bsi.ac.id/",
+    "https://students.bsi.ac.id/"
+  ],
+  "recorded_utc": "2026-10-30T08:11:07.4836088Z",
+  "exclusions": [
+    "All other URLs, redirects, authentication, injection payloads, active scanning, mutation, and other-user data"
+  ],
+  "expires_utc": "2026-10-30T08:26:07.4856193Z",
+  "timeout_seconds": 10,
+  "max_requests": 2,
+  "methods": [
+    "GET"
+  ],
+  "max_runtime_seconds": 120,
+  "environment": "Public production websites",
+  "requests_per_second": 1,
+  "excluded_urls": [],
+  "concurrency": 1,
+  "authorization": "Pengguna menyatakan berwenang dan menyetujui scope awal pada percakapan: dua GET halaman utama, tanpa login atau redirect."
+}

@@ -1,0 +1,71 @@
+rules:
+  - id: studentv2.dom-html-from-url
+    languages: [javascript]
+    severity: WARNING
+    message: Browser-controlled input may reach an HTML sink; review sanitization and reachability.
+    metadata:
+      cwe: [CWE-79]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: location.search
+          - pattern: location.hash
+          - pattern: location.href
+          - pattern: window.location.search
+          - pattern: window.location.hash
+          - pattern: window.location.href
+          - pattern: document.URL
+          - pattern: document.referrer
+          - pattern: window.name
+    pattern-sanitizers:
+      - pattern: DOMPurify.sanitize(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $EL.innerHTML = $DATA
+              - pattern: $EL.outerHTML = $DATA
+              - pattern: $EL.insertAdjacentHTML($WHERE, $DATA)
+              - pattern: document.write($DATA)
+              - pattern: $J.html($DATA)
+          - focus-metavariable: $DATA
+  - id: studentv2.dynamic-code-from-url
+    languages: [javascript]
+    severity: WARNING
+    message: Browser-controlled input may reach dynamic code execution; verify source and validation.
+    metadata:
+      cwe: [CWE-95]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: location.search
+          - pattern: location.hash
+          - pattern: window.location.search
+          - pattern: window.location.hash
+          - pattern: window.name
+    pattern-sinks:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: new Function(...)
+  - id: studentv2.password-in-browser-storage
+    languages: [javascript]
+    severity: WARNING
+    message: A password-like storage key requires review; do not export stored values.
+    metadata:
+      cwe: [CWE-922]
+    patterns:
+      - pattern-either:
+          - pattern: localStorage.setItem($KEY, $VALUE)
+          - pattern: sessionStorage.setItem($KEY, $VALUE)
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*pass(word|wd)?.*
+  - id: studentv2.html-sink-review
+    languages: [javascript]
+    severity: INFO
+    message: HTML sink inventory only; constant markup is not XSS.
+    pattern-either:
+      - pattern: $EL.innerHTML = $DATA
+      - pattern: $EL.outerHTML = $DATA
+      - pattern: $EL.insertAdjacentHTML($WHERE, $DATA)
+      - pattern: document.write($DATA)
+      - pattern: $J.html($DATA)

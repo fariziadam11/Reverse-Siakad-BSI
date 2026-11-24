@@ -1,0 +1,231 @@
+{
+  "started_utc": "2026-10-30T08:40:30.456594+00:00",
+  "requests_sent": 4,
+  "observations": [
+    {
+      "context": "anonymous",
+      "url": "https://students.bsi.ac.id/mahasiswa/beranda",
+      "method": "GET",
+      "status": 302,
+      "redirect_path": "/login",
+      "login_form_present": false,
+      "authenticated_profile_markers": false,
+      "profile_text_present": false,
+      "profile_matches_supplied_account": null,
+      "select2_target_selectors": {
+        ".js-example-templating": false,
+        ".select2-client-search": false
+      },
+      "link_paths_not_requested": [
+        "/login"
+      ],
+      "forms": [],
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true
+    },
+    {
+      "context": "pre-login",
+      "url": "https://students.bsi.ac.id/login",
+      "method": "GET",
+      "status": 200,
+      "redirect_path": "",
+      "login_form_present": true,
+      "authenticated_profile_markers": false,
+      "profile_text_present": false,
+      "profile_matches_supplied_account": null,
+      "select2_target_selectors": {
+        ".js-example-templating": false,
+        ".select2-client-search": false
+      },
+      "link_paths_not_requested": [
+        "",
+        "/",
+        "/forgot-password"
+      ],
+      "forms": [
+        {
+          "method": "POST",
+          "action_path": "/login",
+          "csrf_hidden_present": true
+        }
+      ],
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true
+    },
+    {
+      "context": "login",
+      "url": "https://students.bsi.ac.id/login",
+      "method": "POST",
+      "status": 302,
+      "redirect_path": "/dashboard",
+      "login_form_present": false,
+      "authenticated_profile_markers": false,
+      "profile_text_present": false,
+      "profile_matches_supplied_account": null,
+      "select2_target_selectors": {
+        ".js-example-templating": false,
+        ".select2-client-search": false
+      },
+      "link_paths_not_requested": [
+        "/dashboard"
+      ],
+      "forms": [],
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true
+    },
+    {
+      "context": "authenticated",
+      "url": "https://students.bsi.ac.id/mahasiswa/beranda",
+      "method": "GET",
+      "status": 200,
+      "redirect_path": "",
+      "login_form_present": false,
+      "authenticated_profile_markers": true,
+      "profile_text_present": true,
+      "profile_matches_supplied_account": true,
+      "select2_target_selectors": {
+        ".js-example-templating": false,
+        ".select2-client-search": false
+      },
+      "link_paths_not_requested": [
+        "/mahasiswa/beranda",
+        "/mahasiswa/berita",
+        "/mahasiswa/cuti-mhs",
+        "/mahasiswa/data-pribadi",
+        "/mahasiswa/dokumen-saya",
+        "/mahasiswa/download-perubahan-ujian",
+        "/mahasiswa/email-prodi",
+        "/mahasiswa/jadwal-kuliah",
+        "/mahasiswa/jadwal-mengajar",
+        "/mahasiswa/kalender",
+        "/mahasiswa/khs",
+        "/mahasiswa/khs-semester",
+        "/mahasiswa/konseling-pa",
+        "/mahasiswa/kritik-saran",
+        "/mahasiswa/krs",
+        "/mahasiswa/kuesioner",
+        "/mahasiswa/linkzoom-prawisuda",
+        "/mahasiswa/myLMS",
+        "/mahasiswa/nilai-her",
+        "/mahasiswa/nilai-murni",
+        "/mahasiswa/nilai-uas",
+        "/mahasiswa/nilai-uts",
+        "/mahasiswa/password",
+        "/mahasiswa/pendaftaran",
+        "/mahasiswa/pengajuan-aktif-cuti",
+        "/mahasiswa/pengajuan-mutasi-kampus",
+        "/mahasiswa/pengajuan-ttd",
+        "/mahasiswa/perubahan-biodata",
+        "/mahasiswa/quick/elibrary",
+        "/mahasiswa/quick/lsp",
+        "/mahasiswa/quick/pkl",
+        "/mahasiswa/quick/repository",
+        "/mahasiswa/seminar",
+        "/mahasiswa/serkom",
+        "/mahasiswa/sk-akreditasi",
+        "/mahasiswa/surat-keterangan-bsi",
+        "/mahasiswa/surat-riset-tugas",
+        "/mahasiswa/surat-riset/template",
+        "/mahasiswa/tugas-akhir",
+        "/mahasiswa/uas",
+        "/mahasiswa/uher",
+        "/mahasiswa/upload-ta",
+        "/mahasiswa/uts",
+        "/mahasiswa/verifikasi-diri",
+        "/mahasiswa/wisuda",
+        "/mhs_download/upload_file/{value}",
+        "/mhs_download/{value}",
+        "/mhs_download/{value}//{value}/drive/folders/{value}",
+        "[external omitted]"
+      ],
+      "forms": [
+        {
+          "method": "POST",
+          "action_path": "/logout",
+          "csrf_hidden_present": true
+        },
+        {
+          "method": "POST",
+          "action_path": "/logout",
+          "csrf_hidden_present": true
+        }
+      ],
+      "cookies": [
+        {
+          "secure": true,
+          "httponly": false,
+          "samesite": "lax",
+          "session_name_hint": false
+        },
+        {
+          "secure": true,
+          "httponly": true,
+          "samesite": "lax",
+          "session_name_hint": true
+        }
+      ],
+      "cache_control": "no-cache, private",
+      "csp_present": false,
+      "frame_ancestors_present": false,
+      "x_frame_options": "",
+      "hsts_present": false,
+      "nosniff": true
+    }
+  ],
+  "session_cookie_value_change": "changed",
+  "stopped": ""
+}

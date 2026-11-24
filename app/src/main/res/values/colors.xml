@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Organic design system tokens (design handoff: _ds/organic/styles.css). -->
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="bg">#F5EAD8</color>
+    <color name="surface">#EBDDC5</color>
+    <color name="text">#201E1D</color>
+    <color name="accent">#C67139</color>
+
+    <color name="neutral_100">#F9F4ED</color>
+    <color name="neutral_200">#EEE7DB</color>
+    <color name="neutral_300">#DCD3C4</color>
+    <color name="neutral_400">#C0B6A5</color>
+    <color name="neutral_700">#645C50</color>
+    <color name="neutral_800">#474238</color>
+    <color name="neutral_900">#2E2B25</color>
+
+    <color name="accent_100">#FFF2EB</color>
+    <color name="accent_200">#FFE1D0</color>
+    <color name="accent_300">#FFC6A5</color>
+    <color name="accent_600">#B2622D</color>
+    <color name="accent_700">#8C491A</color>
+    <color name="accent_800">#643312</color>
+
+    <color name="accent_2_100">#F0FAE1</color>
+    <color name="accent_2_200">#E1EECC</color>
+    <color name="accent_2_300">#CCDBB2</color>
+    <color name="accent_2_400">#AEBF92</color>
+    <color name="accent_2_600">#728157</color>
+    <color name="accent_2_700">#56633F</color>
+    <color name="accent_2_800">#3D472B</color>
+    <color name="accent_2_900">#272E1B</color>
 </resources>

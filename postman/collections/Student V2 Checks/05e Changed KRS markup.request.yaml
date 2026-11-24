@@ -1,0 +1,16 @@
+$kind: http-request
+url: '{{baseUrl}}/__changed/mahasiswa/krs'
+method: GET
+order: 5900
+headers:
+  - {key: Cookie, value: '{{sessionCookie}}'}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('A simulated incompatible KRS retains its session shell but loses its table', function () {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.text()).to.include('app-content');
+        pm.expect(pm.response.text()).to.include('new-krs-layout');
+        pm.expect(pm.response.text()).not.to.include('<table');
+      });

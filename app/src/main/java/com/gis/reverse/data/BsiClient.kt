@@ -305,6 +305,7 @@ class BsiClient(
         if (response.location != null) throw PortalError("Layanan ini dibuka melalui halaman resmi.")
         val doc = PortalParser.document(response.html, response.url)
         if (loginDetector(doc)) throw SessionExpired()
+        PortalParser.validatePage(doc)
         return doc
     }
 

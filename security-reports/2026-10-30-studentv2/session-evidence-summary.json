@@ -1,0 +1,22 @@
+{
+  "requests_sent": 4,
+  "anonymous_status": 302,
+  "anonymous_redirect_path": "/login",
+  "authenticated_status": 200,
+  "profile_matches_supplied_account": true,
+  "session_cookie_value_change": "changed",
+  "backend_session_id_rotation": "not established by opaque cookie comparison",
+  "select2_selectors_in_initial_html": {
+    "pre-login": {
+      ".js-example-templating": false,
+      ".select2-client-search": false
+    },
+    "authenticated": {
+      ".js-example-templating": false,
+      ".select2-client-search": false
+    }
+  },
+  "discovered_link_metadata_count": 49,
+  "discovered_endpoints_requested": false,
+  "semgrep_fixture_controls": "PASS via scan plus exact-match assertions"
+}

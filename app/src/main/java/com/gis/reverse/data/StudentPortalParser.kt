@@ -9,6 +9,21 @@ object StudentPortalParser {
     const val ORIGIN = "https://students.bsi.ac.id"
     const val HOME = "/mahasiswa/beranda"
 
+    fun validatePage(doc: Document) {
+        val path = URI(doc.location()).path.orEmpty()
+        val knownPage = listOf(HOME, "/mahasiswa/krs", "/mahasiswa/khs-semester", "/mahasiswa/data-pribadi", "/mahasiswa/jadwal-mengajar")
+            .any { path.endsWith(it) }
+        if (!knownPage || notices(doc).isNotEmpty()) return
+        val content = doc.selectFirst(".app-content, main, [role=main]")
+        val valid = content != null && when {
+            path.endsWith("/krs") || path.endsWith("/jadwal-mengajar") -> content.selectFirst("table") != null ||
+                Regex("(?i)(?:belum|tidak) ada (?:data|jadwal|krs)|(?:data|jadwal|krs) belum tersedia").containsMatchIn(content.text())
+            path.endsWith("/khs-semester") -> content.selectFirst("select[name=semester]") != null
+            else -> content.children().isNotEmpty()
+        }
+        if (!valid) throw PortalError("Struktur halaman Student V2 berubah atau respons belum lengkap. Muat ulang; jika tetap gagal, aplikasi perlu diperbarui.")
+    }
+
     fun isLogin(doc: Document): Boolean = doc.select("form").any {
         it.selectFirst("input[name=username]") != null && it.selectFirst("input[name=password]") != null
     }
@@ -88,7 +103,7 @@ object StudentPortalParser {
         return NativePage(facts, paragraphs, emptyList(), notices(doc), forms, links.distinctBy { it.url }, tables(main))
     }
 
-    private fun main(doc: Document): Element = doc.selectFirst(".app-content") ?: doc.selectFirst("main") ?: doc.body()
+    private fun main(doc: Document): Element = doc.selectFirst(".app-content") ?: doc.selectFirst("main, [role=main]") ?: doc.body()
 
     private fun facts(root: Element): List<Pair<String, String>> {
         val visible = root.clone().also { copy ->

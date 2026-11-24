@@ -1,0 +1,108 @@
+{
+  "findings": [
+    {
+      "title": "Header X-Content-Type-Options tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://elearning.bsi.ac.id/",
+      "evidence": "Respons tidak menyertakan X-Content-Type-Options. Ketiadaan header saja tidak membuktikan MIME sniffing yang dapat dieksploitasi. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Potensi berkurangnya perlindungan MIME sniffing; dampak bergantung pada tipe konten dan cara browser memakainya.",
+      "mitigation": "Tambahkan X-Content-Type-Options: nosniff dan pastikan Content-Type sesuai pada setiap respons.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header HSTS tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://elearning.bsi.ac.id/",
+      "evidence": "Respons HTTPS tidak menyertakan Strict-Transport-Security. Status preload dan kebijakan subdomain tidak diperiksa; serangan downgrade tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Perlindungan browser untuk kunjungan berikutnya tidak dapat dibuktikan dari respons ini; downgrade atau kebocoran kredensial tidak terbukti.",
+      "mitigation": "Terapkan Strict-Transport-Security setelah memastikan seluruh layanan terkait siap HTTPS. Evaluasi includeSubDomains dan preload sebelum mengaktifkannya.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header Content-Security-Policy tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://students.bsi.ac.id/",
+      "evidence": "Respons dokumen HTML tidak menyertakan header Content-Security-Policy. CSP melalui meta tag tidak diperiksa karena body tidak disimpan; XSS tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Lapisan mitigasi injeksi konten melalui header tidak terlihat. Ini bukan bukti adanya XSS.",
+      "mitigation": "Tinjau CSP yang mungkin tersedia melalui meta tag dan terapkan kebijakan header sesuai sumber konten aplikasi; evaluasi terlebih dahulu dengan Report-Only.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "title": "Header HSTS tidak ditemukan",
+      "severity": "Low",
+      "status": "indication",
+      "location": "GET https://students.bsi.ac.id/",
+      "evidence": "Respons HTTPS tidak menyertakan Strict-Transport-Security. Status preload dan kebijakan subdomain tidak diperiksa; serangan downgrade tidak diuji. Bukti: observasi satu GET berstatus HTTP 200 pada 2026-10-30T08:11:07.4836088Z; tanpa redirect dan tanpa autentikasi.",
+      "impact": "Perlindungan browser untuk kunjungan berikutnya tidak dapat dibuktikan dari respons ini; downgrade atau kebocoran kredensial tidak terbukti.",
+      "mitigation": "Terapkan Strict-Transport-Security setelah memastikan seluruh layanan terkait siap HTTPS. Evaluasi includeSubDomains dan preload sebelum mengaktifkannya.",
+      "cwe": "CWE-693 (Protection Mechanism Failure; klasifikasi kontrol yang perlu ditinjau)",
+      "cvss": "Tidak tersedia: dampak dan metrik eksploitasi belum dapat ditentukan.",
+      "reproduction": "Tinjau keberadaan header pada bukti observasi yang tersimpan. Jangan mengirim request tambahan di luar scope.",
+      "retest": "Setelah perbaikan dan otorisasi baru, periksa header pada endpoint serta konteks konten yang sama."
+    },
+    {
+      "severity": "Low",
+      "status": "indication",
+      "cvss": "Tidak tersedia: dampak dan metrik belum terbukti.",
+      "reproduction": "Tinjau atribut yang diringkas di login-observations.json. Tidak diperlukan payload atau percobaan login tambahan.",
+      "retest": "Dengan scope baru, verifikasi header/cookie sesuai fungsi aktual dan uji regresi alur login sesudah perbaikan.",
+      "title": "Cookie login Elearning teramati tanpa atribut Secure",
+      "location": "GET https://elearning.bsi.ac.id/login",
+      "cwe": "CWE-614 (Sensitive Cookie in HTTPS Session Without Secure Attribute; sensitivitas cookie belum diverifikasi)",
+      "evidence": "GET /login mengembalikan HTTP 200. Dua Set-Cookie diringkas dengan Secure=false, SameSite hadir pada keduanya, dan HttpOnly hadir pada satu cookie. Nama/nilai cookie tidak disertakan. Fungsi cookie dan HSTS preload belum diketahui.",
+      "impact": "Jika cookie tersebut membawa sesi atau informasi sensitif, ketiadaan Secure berpotensi memperluas pengirimannya melalui HTTP. Pengiriman HTTP dan kebocoran sesi tidak diuji atau dibuktikan.",
+      "mitigation": "Identifikasi fungsi tiap cookie; beri Secure pada cookie sesi dan cookie sensitif di layanan HTTPS. Tinjau konfigurasi HTTPS/proxy serta HSTS. Jangan mewajibkan HttpOnly untuk cookie yang memang perlu dibaca JavaScript, misalnya token CSRF tertentu."
+    },
+    {
+      "severity": "Low",
+      "status": "indication",
+      "cvss": "Tidak tersedia: dampak dan metrik belum terbukti.",
+      "reproduction": "Tinjau atribut yang diringkas di login-observations.json. Tidak diperlukan payload atau percobaan login tambahan.",
+      "retest": "Dengan scope baru, verifikasi header/cookie sesuai fungsi aktual dan uji regresi alur login sesudah perbaikan.",
+      "title": "Header CSP tidak terlihat pada login Students",
+      "location": "GET https://students.bsi.ac.id/login",
+      "cwe": "CWE-693 (Protection Mechanism Failure; kontrol tambahan perlu ditinjau)",
+      "evidence": "GET /login berstatus HTTP 200 dan csp_header_present=false. HTML tidak disimpan; CSP meta dan encoding kontekstual tidak ditinjau. Tidak ada payload XSS.",
+      "impact": "Lapisan pembatasan sumber konten melalui header tidak terlihat. Ini tidak membuktikan adanya XSS.",
+      "mitigation": "Evaluasi CSP yang sesuai dependensi dan sumber daya login, mulai dari Report-Only; pertahankan escaping output dan validasi input."
+    },
+    {
+      "severity": "Low",
+      "status": "indication",
+      "cvss": "Tidak tersedia: dampak dan metrik belum terbukti.",
+      "reproduction": "Tinjau atribut yang diringkas di login-observations.json. Tidak diperlukan payload atau percobaan login tambahan.",
+      "retest": "Dengan scope baru, verifikasi header/cookie sesuai fungsi aktual dan uji regresi alur login sesudah perbaikan.",
+      "title": "Proteksi framing melalui header tidak terlihat pada login Students",
+      "location": "GET https://students.bsi.ac.id/login",
+      "cwe": "CWE-1021 (Improper Restriction of Rendered UI Layers or Frames; indikasi belum diuji)",
+      "evidence": "Respons GET /login HTTP 200 mencatat framing_header_present=false dan csp_header_present=false. Tidak ada pengujian iframe atau interaksi pengguna.",
+      "impact": "Proteksi deklaratif X-Frame-Options atau CSP frame-ancestors tidak terlihat; kelayakan dan dampak clickjacking belum terbukti.",
+      "mitigation": "Jika halaman tidak perlu di-embed, gunakan CSP frame-ancestors 'none' atau kebijakan asal yang sesuai; pertimbangkan X-Frame-Options untuk kompatibilitas."
+    }
+  ],
+  "limitations": [
+    "Tahap lanjutan: izin login normal diberikan secara eksplisit pada percakapan; scope dicatat di login-scope.json. Periode dimulai 2026-10-30T08:16:20.4952278Z, berlaku 15 menit. Maksimum total 20 request, 1 request/detik, concurrency 1, timeout 10 detik, tanpa retry/redirect otomatis.",
+    "Trafik tahap ini: tiga request total, yaitu GET /login Elearning (200), GET /login Students (200), dan satu POST /login Students (302). Tidak ada request dashboard. Dua GET root berasal dari tahap sebelumnya dan diberi endpoint masing-masing.",
+    "Elearning: CAPTCHA terdeteksi pada formulir; tidak mengirim kredensial atau POST ke portal ini. Tidak mencoba menjawab atau melewati CAPTCHA.",
+    "Students: POST login menghasilkan redirect di luar allowlist; tidak diikuti. Ini bukan bukti sukses/gagal autentikasi atau open redirect. Tidak ada percobaan ulang, akses dashboard, atau pengujian akun lain.",
+    "Kontrol teramati: Cache-Control no-cache, private pada kedua login; hidden _token pada kedua form (efektivitas CSRF backend belum diuji); cookie Students memakai Secure dan SameSite; satu cookie tiap portal memakai HttpOnly. Cookie tanpa HttpOnly belum dianggap celah karena fungsinya belum diketahui.",
+    "CSP hadir pada login Elearning tetapi isinya belum dianalisis; tidak adanya X-Frame-Options saja tidak dinyatakan celah framing karena CSP mungkin menyediakan frame-ancestors.",
+    "Semua temuan adalah indikasi kontrol/hardening berisiko Low, bukan eksploitasi terkonfirmasi. Tidak ada false positive yang telah dibuktikan. Temuan CSP dan framing Students terkait respons yang sama, sehingga risikonya tidak dijumlahkan.",
+    "SQLi, XSS, IDOR, broken access control, sesi sesudah login, rotasi sesi, logout, dan REST API internal belum dinilai. Tidak menjalankan ZAP/Nuclei/Semgrep atau active scan; observasi terbatas dipakai untuk menjaga scope. Source backend tidak tersedia.",
+    "Kredensial sementara digunakan melalui berkas lokal dengan ACL khusus pengguna, bukan argumen CLI, lalu berkas dihapus. Laporan tidak memuat username/password, nama/nilai cookie, token CSRF, raw body, atau data akademik.",
+    "State lokal, cookie jar, dan fragmen CAPTCHA tahap ini dihapus sesudah pemeriksaan. Sesi server tidak dicabut melalui logout karena endpoint itu di luar scope. Ini bukan penghapusan forensik atau jaminan pencabutan sesi server.",
+    "Bukti lama dari direktori 2026-10-30-bsi hanya menjadi petunjuk awal dan bukan sumber otorisasi baru. Kesimpulan laporan menggunakan observasi root tahap sebelumnya dan login tahap ini."
+  ]
+}

@@ -16,11 +16,15 @@ class StudentPortalClient(
         authenticatedDetector = ::authenticated
     )
 
-    fun page(path: String): Document = transport.page(path)
+    fun page(path: String): Document = transport.page(path).also { StudentPortalParser.validatePage(it) }
 
     fun read(path: String): BsiClient.Response {
         val response = transport.request(path)
-        if (response.location == null && StudentPortalParser.isLogin(PortalParser.document(response.html, response.url))) throw SessionExpired()
+        if (response.location == null) {
+            val doc = PortalParser.document(response.html, response.url)
+            if (StudentPortalParser.isLogin(doc)) throw SessionExpired()
+            StudentPortalParser.validatePage(doc)
+        }
         return response
     }
 

@@ -1,0 +1,36 @@
+{
+  "authorization": "Pengguna: semua yang saya izinkan, kalau perlu login; menanggapi dua URL login eksplisit dan batas dua GET.",
+  "created_utc": "2026-10-30T07:58:02.8200108Z",
+  "expires_utc": "2026-10-30T08:28:02.8220151Z",
+  "environment": "Portal BSI publik/produksi; kepemilikan server tidak diverifikasi; observasi non-invasif atas izin pengguna",
+  "methods": [
+    "GET"
+  ],
+  "allowed_urls": [
+    "https://elearning.bsi.ac.id/login",
+    "https://students.bsi.ac.id/login"
+  ],
+  "exact_origins": [
+    "https://elearning.bsi.ac.id:443",
+    "https://students.bsi.ac.id:443"
+  ],
+  "excluded_urls": [],
+  "exclusions": [
+    "Semua URL selain dua allowed_urls",
+    "Login POST, logout, mutasi, crawling, payload injeksi, bypass CAPTCHA, brute force, data pengguna lain, SSO, Juice Shop"
+  ],
+  "max_requests": 2,
+  "rate_per_second": 1,
+  "concurrency": 1,
+  "timeout_seconds": 10,
+  "retries": 0,
+  "max_run_seconds": 120,
+  "redirects": false,
+  "stop_on": [
+    "429",
+    "5xx",
+    "instability",
+    "expiry",
+    "budget exhaustion"
+  ]
+}

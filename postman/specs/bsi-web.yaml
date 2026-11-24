@@ -13,6 +13,10 @@ info:
     verified login redirection as expired authentication. After HTTP 419 it
     checks the dashboard once before requesting login; a valid dashboard
     means the form must be refreshed without repeating its submission.
+    Read-only reinspection on 2026-10-30 returned text/html for dashboard,
+    schedule, learning and discussion even with Accept application/json.
+    The client checks known page structure before displaying data. A missing
+    schedule structure is a compatibility error, not proof of an empty schedule.
 servers:
   - url: https://elearning.bsi.ac.id
 paths:

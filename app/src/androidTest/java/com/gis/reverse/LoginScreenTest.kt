@@ -40,7 +40,7 @@ class LoginScreenTest {
             onView(withHint("NIP / NIM")).perform(scrollTo(), replaceText("123"), closeSoftKeyboard())
             onView(withText("Masuk ke akun")).perform(scrollTo(), click())
             onView(withText("Isi password.")).check(matches(isDisplayed()))
-            onView(withText("Ganti kode keamanan")).perform(scrollTo(), click())
+            onView(withContentDescription("Ganti kode keamanan")).perform(scrollTo(), click())
             waitUntil { onView(withText("Masuk ke akun")).check(matches(isEnabled())) }
             onView(withText("Ingat akun pada perangkat ini")).perform(scrollTo(), click())
             onView(withText("Ingat akun pada perangkat ini")).check(matches(isChecked()))

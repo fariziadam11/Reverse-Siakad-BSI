@@ -1,0 +1,10 @@
+[
+  {
+    "Host": "elearning.bsi.ac.id",
+    "Address": "101.255.173.2"
+  },
+  {
+    "Host": "students.bsi.ac.id",
+    "Address": "101.255.173.3"
+  }
+]

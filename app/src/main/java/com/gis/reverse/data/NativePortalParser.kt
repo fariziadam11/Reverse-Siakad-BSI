@@ -7,9 +7,21 @@ import java.net.URI
 object NativePortalParser {
     fun page(doc: Document): NativePage {
         val main = PortalParser.main(doc)
+        val topics = main.select(".task-list > .task-block").map { item ->
+            val description = item.select(".task-desc").clone().also { it.select("input, button").remove() }.text()
+            val badges = item.select(".task-types .badge")
+            DiscussionTopic(item.select(".task-name").text(), description,
+                badges.firstOrNull()?.text().orEmpty(), badges.getOrNull(1)?.text().orEmpty(),
+                PortalParser.links(item), forms(item).filter { it.download })
+        }
+        val comments = main.select(".chat-box > li").map { item ->
+            DiscussionComment(item.select(".chat-text > .chat-name").text(),
+                item.select(".chat-avatar .chat-name").text(), item.select(".chat-text p").joinToString("\n\n") { it.wholeText().trim() },
+                item.select(".chat-hour").text())
+        }
         val forms = forms(main).filter { form ->
             main.select("form").firstOrNull { it.absUrl("action").ifBlank { doc.location() } == form.action }
-                ?.parents()?.none { it.tagName() == "table" } != false
+                ?.parents()?.none { it.tagName() == "table" || it.hasClass("task-block") } != false
         }
         val facts = main.select(".stats-detail").mapNotNull {
             val label = it.select("p").text()
@@ -17,14 +29,15 @@ object NativePortalParser {
             if (label.isBlank() || value.isBlank()) null else label to value
         }
         val clean = main.clone()
-        clean.select("script, style, form, .modal, table, .nav-tabs, .alert, [role=alert], .stats-detail, .doc-block").remove()
-        val paragraphs = clean.select("h1, h2, h3, h4, h5, h6, p, .task-list > *, .rule-text").map { it.text() }
+        clean.select("script, style, form, .modal, table, .nav-tabs, .alert, [role=alert], .stats-detail, .doc-block, .chat-box, .task-block").remove()
+        if (main.selectFirst(".task-list") != null) clean.select(".tasks-header").remove()
+        val paragraphs = clean.select("h1, h2, h3, h4, h5, h6, p, .task-list > *, .rule-text, .active-user-info .typing").map { it.text() }
             .filter { it.isNotBlank() && it != "×" && it !in facts.map { fact -> fact.second } }
             .distinct()
         val statuses = clean.select("button:not([type=submit])").filter { !it.hasAttr("data-toggle") && !it.hasAttr("data-dismiss") }
             .map { it.text() }.filter { it.isNotBlank() }.distinct()
-        val linkCopy = main.clone().also { it.select("form, .modal").remove() }
-        return NativePage(facts, paragraphs, statuses, notices(doc), forms, PortalParser.links(linkCopy), PortalParser.tables(doc))
+        val linkCopy = main.clone().also { it.select("form, .modal, .task-block").remove() }
+        return NativePage(facts, paragraphs, statuses, notices(doc), forms, PortalParser.links(linkCopy), PortalParser.tables(doc), comments, topics)
     }
 
     fun notices(doc: Document): List<NativeNotice> = doc.select(".alert, [role=alert], .flash-tambah, .flash-error, .invalid-feedback, .text-red-500, .text-red-600").mapNotNull {
@@ -46,7 +59,7 @@ object NativePortalParser {
             val type = when (input.tagName()) { "textarea" -> "textarea"; "select" -> "select"; else -> input.attr("type").lowercase().ifBlank { "text" } }
             if ((type == "radio" || type == "checkbox") && !grouped.add(name)) return@forEach
             val group = if (type == "radio" || type == "checkbox") visible.filter { it.attr("name") == name } else listOf(input)
-            val label = label(input, form, type == "radio")
+            val label = if (URI(action).path == "/send-komentarmhs" && name == "komentar") "Komentar" else label(input, form, type == "radio")
             val context = input.parents().firstOrNull { it.hasClass("form-group") } ?: form
             val help = context.select("code, small, .form-text").text()
             val fileHelp = if (type == "file") form.select("code, small, .form-text").text() else help
@@ -57,7 +70,7 @@ object NativePortalParser {
                 "select" -> input.select("option").map { option -> NativeOption(option.attr("value").ifBlank { if (option.hasAttr("value")) "" else option.text() }, option.text(), option.hasAttr("selected"), option.hasAttr("disabled")) }
                 else -> emptyList()
             }
-            val required = group.any { it.hasAttr("required") } || label.contains('*')
+            val required = group.any { it.hasAttr("required") } || label.contains('*') || (URI(action).path == "/send-komentarmhs" && name == "komentar")
             val accept = input.attr("accept").ifBlank { if (type == "file" && fileHelp.contains("PDF", true)) "application/pdf" else "" }
             fields += NativeField(name, label.replace("*", "").trim().ifBlank { input.attr("placeholder").ifBlank { name } }, type,
                 if (type == "textarea") input.wholeText() else input.attr("value"), required, input.hasAttr("readonly"), options,
@@ -70,6 +83,7 @@ object NativePortalParser {
             path == "/foto-profil/update" -> "Edit profil"
             path == "/profil/update" -> "Ubah password"
             path.contains("tambah-diskusi") -> "Buat diskusi"
+            path == "/send-komentarmhs" -> "Komentar"
             path == "/assignment" -> "Kirim tugas"
             path.contains("kuisoner") -> "Penilaian dosen"
             path.contains("download") -> "Unduh lampiran"
@@ -80,6 +94,7 @@ object NativePortalParser {
         val isDownload = path.contains("download", true)
         val submitLabel = when {
             path.contains("tambah-diskusi") -> "Kirim diskusi"
+            path == "/send-komentarmhs" -> "Kirim komentar"
             isDownload -> "Unduh lampiran"
             else -> submit?.text()?.ifBlank { submit.attr("value") }.orEmpty().ifBlank { if (path.contains("absen", true)) "Kirim presensi" else "Kirim" }
         }

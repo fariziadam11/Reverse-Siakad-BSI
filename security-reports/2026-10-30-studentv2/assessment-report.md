@@ -1,0 +1,119 @@
+# Security assessment (Non-Exploit Mode)
+
+Records: 7
+Confirmed: 0; Indications: 4; False positives: 3
+
+## Coverage and limitations
+
+- Non-exploit assessment; no active scanning or exploit validation performed by this report generator.
+- Scanner matches are indications unless independently validated; false positives are retained separately from valid findings.
+- Raw HTTP bodies, secrets, and scanner snippets are omitted. Manual secret review is required.
+- Target StudentV2: https://students.bsi.ac.id. Laporan menggabungkan observasi login/beranda, delapan file JavaScript yang diotorisasi, dan validasi sesi terbaru. Scope exact setiap tahap disimpan pada login-scope.json di direktori tahap login, frontend-scope.json, dan session-scope.json. Tidak mengakses Elearning pada tahap StudentV2 ini.
+- Validasi sesi terbaru memakai empat dari maksimum enam request: GET beranda tanpa cookie, GET login, satu POST login normal, dan GET beranda setelah login. Request berurutan, 1 request/detik, timeout 10 detik, tanpa retry, redirect otomatis, payload, atau akses akun lain. Waktu tersedia pada session-observations.json.
+- Batas autentikasi pada beranda: request tanpa cookie mendapat 302 ke /login dan tidak menampilkan teks profil; request setelah login mendapat 200 dan profil cocok dengan akun yang diberikan. Ini membuktikan observasi boundary pada satu endpoint, bukan penilaian seluruh otorisasi atau IDOR.
+- Nilai cookie berindikasi sesi berubah sesudah login. Hanya nilai opaque di cookie yang dibandingkan di memori; perubahan enkripsi/pembungkus dapat menyebabkan perubahan nilai tanpa membuktikan regenerasi ID sesi backend. Tidak ada uji session fixation, replay, pencurian sesi, atau akun lain.
+- Kontrol teramati: cookie berindikasi sesi memakai Secure, HttpOnly, SameSite=Lax; cookie lain juga Secure/SameSite=Lax. Cache-Control no-cache, private dan nosniff hadir. Form login serta form logout di HTML mempunyai metode POST dan hidden \_token. Validasi CSRF server, logout, expiry sesi, dan kebijakan cache browser menyeluruh belum diuji.
+- Kandidat Select2 diturunkan dari Low menjadi Informational: kedua selector target tidak terlihat pada HTML awal login dan beranda. Ini tidak menyatakan kandidat false positive secara global karena JavaScript tidak dieksekusi dan halaman lain belum diperiksa. Tiga false positive sink konstan custom.js tetap dipertahankan beserta alasannya.
+- Metadata link/form dari beranda dicatat tanpa nilai field, query, identitas profil, atau token. Path dengan segmen dinamis dinormalisasi. Link, termasuk SSO, download, perubahan profil, dan logout, tidak diikuti. Ditemukannya link tidak membuktikan keamanan atau keterjangkauan endpoint tersebut.
+- Tahap frontend: delapan GET terotorisasi, semuanya 200; tidak login ulang atau mengakses CDN. REA mem-parsing 8/8 file \(87.978 byte\) tanpa eksekusi dan parse failure. Semantic coverage tetap unknown dengan 2.843 unknown. Statistik 42 findings REA bukan 42 kerentanan. Detail identitas artefak ada di frontend-manifest.json dan frontend-evidence-summary.json.
+- Semgrep memindai 8/8 file dengan empat rule lokal, tanpa error, dalam container network none dan mount source read-only. Tiga match inventaris sink ditolak setelah review sumber konstan/angka. Tidak ada match pada tiga rule terarah lainnya; keterbatasan sumber taint dan analisis lintas fungsi tetap berlaku.
+- Validasi rule offline: native Semgrep --test mengalami error internal pemetaan fixture pada image terpasang. Sebagai pengganti, scan biasa terhadap fixture sintetis diikuti assert menghasilkan tepat empat match yang diharapkan dan tidak menandai kontrol textContent/theme. Fixture hanya dibaca, tidak dieksekusi; tools tidak diinstal ulang atau diperbarui.
+- Review Select2 merujuk dokumentasi primer: https://select2.org/dropdown/ dan https://select2.org/selections/ . Source delapan file dan Evidence REA lengkap berada di direktori privat ber-ACL. Laporan memuat bukti minimal, bukan raw body atau source penuh.
+- SQLi, IDOR, broken access control antar-objek/peran, endpoint akademik lain, backend, dependency/CVE, dan DOM dinamis belum dinilai. Tidak ada exploit validation, fuzzing, brute force, bypass CAPTCHA, perubahan data akademik, atau ekstraksi database. Tidak menjalankan ZAP/Nuclei pada target.
+- Hasil terkini: nol kerentanan terkonfirmasi; tiga indikasi hardening Low \(HSTS, CSP, framing\) dan satu kandidat code-level Informational; tiga false positive assignment HTML konstan. CVSS tidak dihitung tanpa metrik dampak. Risiko CSP/framing yang terkait tidak dijumlahkan.
+- Kredensial sementara dihapus melalui finally dan cookie hanya berada dalam memori proses yang telah berakhir. Nilai password, token, cookie, NIM/nama, dan data akademik tidak dimasukkan ke laporan. Logout server tidak dilakukan karena di luar scope; penghapusan state lokal bukan pencabutan sesi server.
+
+## Header HSTS tidak terlihat pada login dan beranda mahasiswa
+
+- Severity: Low
+- Status: indication
+- Source: curated/observer
+- Location: GET https://students.bsi.ac.id/login ; GET https://students.bsi.ac.id/mahasiswa/beranda
+- Evidence: GET /login dan GET /mahasiswa/beranda masing-masing HTTP 200, hsts\_present=false. HAR tersanitasi diproses offline oleh REA, Evidence \[REDACTED\]. Preload dan kebijakan domain induk tidak diperiksa.
+- CWE: CWE-693 \(Protection Mechanism Failure; indikasi kontrol\)
+- CVSS: Tidak tersedia: dampak eksploitasi dan metrik yang diperlukan belum terbukti.
+- Impact: Kebijakan untuk memaksa HTTPS pada browser tidak terlihat pada kedua respons. Tidak membuktikan downgrade atau kebocoran sesi.
+- Reproduction: Periksa observations.json dan capture.har yang tersanitasi. Tidak diperlukan payload atau akses akun lain.
+- Mitigation: Evaluasi penerapan Strict-Transport-Security setelah memastikan kesiapan HTTPS; tinjau subdomain dan preload sebelum mengaktifkan kebijakan luas.
+- Retest: Dengan scope yang masih berlaku atau diperbarui, verifikasi header pada endpoint yang sama setelah perubahan konfigurasi.
+
+## Header CSP tidak terlihat pada login dan beranda mahasiswa
+
+- Severity: Low
+- Status: indication
+- Source: curated/observer
+- Location: GET https://students.bsi.ac.id/login ; GET https://students.bsi.ac.id/mahasiswa/beranda
+- Evidence: csp\_present=false pada kedua GET. Halaman merujuk skrip lokal dan CDN eksternal, tetapi skrip tidak diunduh/dieksekusi. CSP meta, encoding output, dan efektivitas sanitasi belum dianalisis.
+- CWE: CWE-693 \(Protection Mechanism Failure; indikasi kontrol\)
+- CVSS: Tidak tersedia: dampak eksploitasi dan metrik yang diperlukan belum terbukti.
+- Impact: Lapisan mitigasi injeksi konten melalui header tidak terlihat. Ini bukan bukti XSS atau dependency rentan.
+- Reproduction: Periksa observations.json dan capture.har yang tersanitasi. Tidak diperlukan payload atau akses akun lain.
+- Mitigation: Susun CSP sesuai sumber daya aktual, mulai dengan Report-Only dan inventaris dependensi. Pertahankan escaping output dan tinjau kebijakan sumber skrip.
+- Retest: Dengan scope yang masih berlaku atau diperbarui, verifikasi header pada endpoint yang sama setelah perubahan konfigurasi.
+
+## Proteksi framing melalui header tidak terlihat pada login dan beranda mahasiswa
+
+- Severity: Low
+- Status: indication
+- Source: curated/observer
+- Location: GET https://students.bsi.ac.id/login ; GET https://students.bsi.ac.id/mahasiswa/beranda
+- Evidence: x\_frame\_options kosong, csp\_present=false, dan frame\_ancestors\_present=false pada kedua GET. Tidak mencoba iframe, klik, atau perubahan data.
+- CWE: CWE-1021 \(Improper Restriction of Rendered UI Layers or Frames; indikasi\)
+- CVSS: Tidak tersedia: dampak eksploitasi dan metrik yang diperlukan belum terbukti.
+- Impact: Kontrol deklaratif terhadap embedding halaman tidak terlihat. Kelayakan dan dampak clickjacking belum diverifikasi; risiko ini berkaitan dengan temuan CSP dan tidak dijumlahkan.
+- Reproduction: Periksa observations.json dan capture.har yang tersanitasi. Tidak diperlukan payload atau akses akun lain.
+- Mitigation: Jika embedding tidak diperlukan, gunakan CSP frame-ancestors &\#x27;none&\#x27;; jika diperlukan, batasi ke origin yang disetujui. Pertimbangkan X-Frame-Options untuk kompatibilitas.
+- Retest: Dengan scope yang masih berlaku atau diperbarui, verifikasi header pada endpoint yang sama setelah perubahan konfigurasi.
+
+## Pola template Select2 perlu review; selector tidak terlihat pada HTML awal halaman yang diuji
+
+- Severity: Informational
+- Status: indication
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/assets/js/select2.js ; baris 23-52 dan 108-138
+- Evidence: formatState/selectClient menggabungkan state.text/client.text serta nilai opsi ke string markup lalu membentuk objek jQuery. Callback escapeMarkup pada dua konfigurasi mengembalikan argumennya tanpa perubahan. Pola yang sama berulang pada konfigurasi RTL. Review manual atas byte file yang diambil, didukung parsing REA; ini bukan temuan dari rule taint Semgrep. Referensi perilaku library: https://select2.org/dropdown/ dan https://select2.org/selections/ . Validasi tambahan: .js-example-templating dan .select2-client-search tidak ditemukan sebagai class elemen pada HTML awal GET /login maupun GET /mahasiswa/beranda. JavaScript tidak dijalankan; keberadaan pada DOM dinamis atau halaman lain tetap tidak diketahui.
+- CWE: CWE-79 \(Improper Neutralization of Input During Web Page Generation; kandidat source-to-sink\)
+- CVSS: Tidak tersedia: kendali penyerang atas data, keterjangkauan template, dan dampak belum terbukti.
+- Impact: Kandidat code-level bersyarat, bukan XSS yang terbukti pada halaman yang diperiksa. Prioritas diturunkan menjadi Informational sampai selector aktif dan sumber input tidak tepercaya dapat dibuktikan. Sumber data, DOM dinamis, halaman lain, dan kontrol escaping library belum lengkap.
+- Reproduction: Tinjau fungsi dan konfigurasi Select2 pada file tersimpan tanpa menjalankannya. Pada source aplikasi yang diotorisasi, petakan selector aktif dan asal data opsi. Tidak mengirim payload atau mengubah opsi di website produksi.
+- Mitigation: Bangun elemen secara terpisah, isi label memakai textContent atau jQuery .text\(\), dan batasi nilai path gambar ke allowlist. Pertahankan escaping default untuk teks; jika markup diperlukan, gunakan sanitasi yang sesuai konteks.
+- Retest: Gunakan fixture lokal terisolasi untuk memeriksa bahwa karakter khusus pada teks opsi ditampilkan sebagai teks. Verifikasi keterjangkauan callback sebelum menaikkan prioritas temuan.
+
+## Penanda HTML sink custom.js:71 bukan bukti XSS pada alur yang ditinjau
+
+- Severity: Informational
+- Status: false-positive
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/assets/js/custom.js ; baris 71
+- Evidence: Rule studentv2.html-sink-review mendata sink HTML tanpa membuktikan taint. Nilai theme berasal dari array lokal nanoThemes yang berisi string tetap nano. Ruang lingkup penolakan hanya kandidat XSS pada assignment ini dan versi file tersimpan.
+- CWE: CWE-79 \(kategori kandidat yang disingkirkan\)
+- CVSS: Tidak berlaku untuk kandidat yang disingkirkan.
+- Impact: Tidak ada alur input penyerang ke sink yang ditunjukkan oleh assignment ini.
+- Mitigation: Tidak memerlukan perbaikan keamanan untuk alur konstan ini. textContent dapat dipakai untuk teks biasa bila kode diubah kemudian.
+- Retest: Tinjau ulang jika sumber nilai berubah menjadi input pengguna atau data eksternal.
+
+## Penanda HTML sink custom.js:153 bukan bukti XSS pada alur yang ditinjau
+
+- Severity: Informational
+- Status: false-positive
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/assets/js/custom.js ; baris 153
+- Evidence: Rule studentv2.html-sink-review mendata sink HTML tanpa membuktikan taint. Loop kedua juga mengambil theme dari array lokal nanoThemes yang sama, bukan input pengguna. Ruang lingkup penolakan hanya kandidat XSS pada assignment ini dan versi file tersimpan.
+- CWE: CWE-79 \(kategori kandidat yang disingkirkan\)
+- CVSS: Tidak berlaku untuk kandidat yang disingkirkan.
+- Impact: Tidak ada alur input penyerang ke sink yang ditunjukkan oleh assignment ini.
+- Mitigation: Tidak memerlukan perbaikan keamanan untuk alur konstan ini. textContent dapat dipakai untuk teks biasa bila kode diubah kemudian.
+- Retest: Tinjau ulang jika sumber nilai berubah menjadi input pengguna atau data eksternal.
+
+## Penanda HTML sink custom.js:314 bukan bukti XSS pada alur yang ditinjau
+
+- Severity: Informational
+- Status: false-positive
+- Source: curated/observer
+- Location: https://students.bsi.ac.id/assets/js/custom.js ; baris 314
+- Evidence: Rule studentv2.html-sink-review mendata sink HTML tanpa membuktikan taint. Nilai yang dimasukkan adalah hasil numerik new Date\(\).getFullYear\(\), bukan teks dari pengguna. Ruang lingkup penolakan hanya kandidat XSS pada assignment ini dan versi file tersimpan.
+- CWE: CWE-79 \(kategori kandidat yang disingkirkan\)
+- CVSS: Tidak berlaku untuk kandidat yang disingkirkan.
+- Impact: Tidak ada alur input penyerang ke sink yang ditunjukkan oleh assignment ini.
+- Mitigation: Tidak memerlukan perbaikan keamanan untuk alur konstan ini. textContent dapat dipakai untuk teks biasa bila kode diubah kemudian.
+- Retest: Tinjau ulang jika sumber nilai berubah menjadi input pengguna atau data eksternal.

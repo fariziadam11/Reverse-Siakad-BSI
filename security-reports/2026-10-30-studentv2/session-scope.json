@@ -1,0 +1,33 @@
+{
+  "max_requests": 6,
+  "timeout_seconds": 10,
+  "observations_allowed": [
+    "Akses beranda anonim dan setelah login",
+    "Rotasi cookie sesi",
+    "Selector Select2 beranda",
+    "Metadata link/form tanpa mengaksesnya"
+  ],
+  "concurrency": 1,
+  "retries": 0,
+  "max_runtime_seconds": 120,
+  "exclusions": [
+    "Redirect",
+    "Payload",
+    "Akun lain",
+    "Perubahan data akademik",
+    "Akses URL selain allowlist"
+  ],
+  "authorization": "Pengguna memilih Izinkan validasi sesi dengan batas tersebut pada percakapan.",
+  "expires_utc": "2026-10-30T08:54:16.7027550Z",
+  "requests_per_second": 1,
+  "allowed_requests": {
+    "https://students.bsi.ac.id/login": [
+      "GET",
+      "POST"
+    ],
+    "https://students.bsi.ac.id/mahasiswa/beranda": [
+      "GET"
+    ]
+  },
+  "created_utc": "2026-10-30T08:39:16.7008038Z"
+}

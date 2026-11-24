@@ -1,0 +1,45 @@
+{
+  "concurrency": 1,
+  "allowed_requests": {
+    "https://students.bsi.ac.id/mahasiswa/beranda": [
+      "GET"
+    ],
+    "https://elearning.bsi.ac.id/login": [
+      "GET",
+      "POST"
+    ],
+    "https://elearning.bsi.ac.id/user/dashboard": [
+      "GET"
+    ],
+    "https://students.bsi.ac.id/login": [
+      "GET",
+      "POST"
+    ]
+  },
+  "rate_per_second": 1,
+  "max_run_seconds": 120,
+  "retries": 0,
+  "exclusions": [
+    "Semua URL lain",
+    "Redirect otomatis",
+    "Mutasi data akademik",
+    "Injeksi",
+    "Bypass CAPTCHA",
+    "Brute force",
+    "Akun lain"
+  ],
+  "authorization": "Pengguna secara eksplisit memilih Izinkan login normal dengan scope tersebut, termasuk pengecualian atas batas tanpa login pada skill.",
+  "expires_utc": "2026-10-30T08:31:20.4976051Z",
+  "environment": "Portal produksi BSI",
+  "timeout_seconds": 10,
+  "max_requests": 20,
+  "stop_on": [
+    "CAPTCHA pada portal terkait",
+    "429",
+    "5xx",
+    "Instability",
+    "Expiry",
+    "Budget exhaustion"
+  ],
+  "created_utc": "2026-10-30T08:16:20.4952278Z"
+}

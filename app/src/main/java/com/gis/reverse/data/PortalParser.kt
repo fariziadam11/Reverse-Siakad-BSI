@@ -9,6 +9,33 @@ object PortalParser {
     fun document(html: String, url: String = ORIGIN): Document = Jsoup.parse(html, url)
     fun isLogin(doc: Document): Boolean = doc.selectFirst("form input[name=username]") != null && doc.selectFirst("input[name=captcha_answer]") != null
 
+    fun validatePage(doc: Document) {
+        val path = java.net.URI(doc.location()).path.orEmpty()
+        val main = main(doc)
+        val valid = when {
+            path.endsWith("/user/dashboard") -> doc.select(".user-display-name").text().isNotBlank() && doc.select(".user-identifier").text().isNotBlank()
+            path.endsWith("/sch") -> {
+                val cards = main.select(".jadwal-card")
+                if (cards.isEmpty()) Regex("(?i)(?:belum|tidak) ada jadwal|jadwal (?:kuliah )?belum tersedia").containsMatchIn(main.text())
+                else courses(doc).all { it.title.isNotBlank() && it.code.isNotBlank() && it.schedule.isNotBlank() }
+            }
+            path.contains("/form-diskusimhs/") -> main.selectFirst(".task-list")?.let { list ->
+                list.children().all { it.hasClass("task-block") && it.select(".task-name").text().isNotBlank() }
+            } == true
+            path.contains("/form-komentarmhs/") -> {
+                val form = main.select("form[action]").firstOrNull { it.absUrl("action").substringBefore('?').endsWith("/send-komentarmhs") }
+                main.selectFirst(".chat-box") != null && form != null &&
+                    form.selectFirst("textarea[name=komentar]") != null &&
+                    listOf("_token", "id_chat", "id").all { name -> form.selectFirst("input[name=$name]")?.attr("value")?.isNotBlank() == true } &&
+                    main.select(".chat-box > li").all { it.selectFirst(".chat-text p") != null && it.selectFirst(".chat-text > .chat-name") != null && it.selectFirst(".chat-avatar .chat-name") != null }
+            }
+            path.contains("/learning/") -> main.selectFirst(".doc-block, table, iframe[src]") != null
+            path.contains("/assignment/") && !path.contains("/assignment/send/") -> main.selectFirst("table") != null
+            else -> true
+        }
+        if (!valid) throw PortalError("Struktur halaman e-learning berubah atau respons belum lengkap. Muat ulang; jika tetap gagal, aplikasi perlu diperbarui.")
+    }
+
     fun challenge(doc: Document): LoginChallenge {
         val token = doc.selectFirst("input[name=_token]")?.attr("value").orEmpty()
         val svg = doc.selectFirst("#captcha-svg-container svg")?.outerHtml().orEmpty()
@@ -22,10 +49,11 @@ object PortalParser {
 
     fun courses(doc: Document): List<Course> = doc.select(".jadwal-card").map { card ->
         val info = card.select(".jadwal-info-row").associate {
-            it.select(".jadwal-info-label").text().trim().removeSuffix(":") to it.select(".jadwal-info-val").text()
+            it.select(".jadwal-info-label").text().ifBlank { it.children().firstOrNull()?.text().orEmpty() }.trim().removeSuffix(":") to
+                it.select(".jadwal-info-val").text().ifBlank { it.children().drop(1).joinToString(" ") { value -> value.text() } }
         }
-        Course(card.select(".jadwal-title").text(), info["Kode MTK"].orEmpty(), card.select(".jadwal-kelas-pill strong").text(),
-            info["Hari & Jam"].orEmpty(), info["Dosen"].orEmpty(), info["Ruang"].orEmpty(), info["Kampus"].orEmpty(), info["SKS"].orEmpty(),
+        Course(card.selectFirst(".jadwal-title")?.text().orEmpty().ifBlank { card.selectFirst("h5")?.text().orEmpty() }, info["Kode MTK"].orEmpty(), card.select(".jadwal-kelas-pill strong").text(),
+            info["Hari & Jam"].orEmpty().ifBlank { info["Waktu"].orEmpty() }, info["Dosen"].orEmpty(), info["Ruang"].orEmpty(), info["Kampus"].orEmpty(), info["SKS"].orEmpty(),
             !card.hasClass("other-day"), links(card.selectFirst(".jadwal-footer") ?: card))
     }.distinctBy { it.code + it.classroom + it.schedule }
 
@@ -58,5 +86,5 @@ object PortalParser {
         }
         return LearningContent(documents, videos, tables(doc))
     }
-    fun main(doc: Document): Element = doc.selectFirst(".page-content > .main-container") ?: doc.selectFirst(".main-container") ?: doc.body()
+    fun main(doc: Document): Element = doc.selectFirst(".page-content > .main-container") ?: doc.selectFirst(".main-container") ?: doc.selectFirst("main, [role=main]") ?: doc.body()
 }

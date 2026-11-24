@@ -1,0 +1,27 @@
+<!-- Synthetic/deidentified fixture based on observed BSI task blocks. -->
+<main>
+  <div class="tasks-header"><h3>Forum Diskusi</h3><button data-toggle="modal">Add New Task</button></div>
+  <section class="task-list">
+    <div class="task-block">
+      <div class="task-details">
+        <div class="task-name">Pertemuan 6</div>
+        <form action="/download-file-diskusimhs" method="post">
+          <div class="task-desc readmore">Topik keenam
+            <input type="hidden" name="_token" value="TEST_CSRF"><input type="hidden" name="file" value="TEST_6.pdf">
+            <button type="submit">Unduh File</button>
+          </div>
+        </form>
+        <div class="task-types"><form action="/hapus-diskusimhs/test" method="post">
+          <input type="hidden" name="_method" value="delete">
+          <span class="badge">Dosen Uji</span><span class="badge">2026-10-27 19:36:11</span>
+        </form></div>
+      </div>
+      <form action="/form-komentarmhs" method="POST"><input type="hidden" name="id_chat" value="TEST_6"></form>
+      <a href="/form-komentarmhs/meeting-6">Komentar <span>0</span></a>
+    </div>
+    <div class="task-block">
+      <div class="task-details"><div class="task-name">Pertemuan 5</div><div class="task-desc">Topik kelima</div></div>
+      <a href="/form-komentarmhs/meeting-5">Komentar <span>83</span></a>
+    </div>
+  </section>
+</main>

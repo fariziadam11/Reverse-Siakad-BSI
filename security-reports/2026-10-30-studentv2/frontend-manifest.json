@@ -1,0 +1,73 @@
+{
+  "requests_sent": 8,
+  "dns_addresses": [
+    "101.255.173.3"
+  ],
+  "files": [
+    {
+      "url": "https://students.bsi.ac.id/assets/js/authentication-main.js",
+      "file": "authentication-main.js",
+      "status": 200,
+      "bytes": 3272,
+      "sha256": "450375574e7afe7fe8b7ac14d5a4d37fe5efec3b14693d5956c96b108a8ad222",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/show-password.js",
+      "file": "show-password.js",
+      "status": 200,
+      "bytes": 571,
+      "sha256": "9ca826717040025dbd58690943a8564f8396df4b5ae136f52124376c6485b159",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/main.js",
+      "file": "main.js",
+      "status": 200,
+      "bytes": 11363,
+      "sha256": "a5579d3d7745bc68d73517f9f182ea6ce148693c277b0fe3f8bf9b1cc8ec1c69",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/custom.js",
+      "file": "custom.js",
+      "status": 200,
+      "bytes": 15497,
+      "sha256": "3c646ec36ed3013a3ba530ac655bc2f245a5c4790221eb5e8f198082fbfbcd0c",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/datatables.js",
+      "file": "datatables.js",
+      "status": 200,
+      "bytes": 3352,
+      "sha256": "921071894828de07a4b3e8dbcbb098ea39b1a8bdadedee3ee86733472ffaaf32",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/select2.js",
+      "file": "select2.js",
+      "status": 200,
+      "bytes": 6357,
+      "sha256": "abbc6331ae55fb68171bb6aebfc8d590ed56f0055f2dd160969eb85e1787b64d",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/choices.js",
+      "file": "choices.js",
+      "status": 200,
+      "bytes": 2163,
+      "sha256": "a67de0cd2bac0f75512b1ef11ffe82ea34ffbfab870458fbc8ffcaea67dd4db3",
+      "content_type": "application/javascript"
+    },
+    {
+      "url": "https://students.bsi.ac.id/assets/js/defaultmenu.min.js",
+      "file": "defaultmenu.min.js",
+      "status": 200,
+      "bytes": 45403,
+      "sha256": "d3387648f911eb84155b3eda60184af334798c782d7c75efb6901f17de201f32",
+      "content_type": "application/javascript"
+    }
+  ],
+  "stopped": ""
+}

@@ -52,6 +52,13 @@ class BsiClientSimulationTest {
         val error = assertThrows(PortalError::class.java) { client.page("/server-error") }
         assertTrue(error.message!!.contains("503"))
     }
+    @Test fun successfulHttpResponseWithChangedMarkupDoesNotBecomeAnEmptySchedule() {
+        login()
+        val error = assertThrows(PortalError::class.java) { client.page("/__changed/sch") }
+        assertTrue(error.message!!.contains("Struktur halaman"))
+        assertTrue(PortalParser.courses(client.page("/__empty/sch")).isEmpty())
+        assertEquals(2, PortalParser.courses(client.page("/sch")).size)
+    }
     @Test fun crossOriginRedirectIsReturnedWithoutForwardingTheSession() {
         val response = client.request("/outside")
         assertEquals(302, response.status)
